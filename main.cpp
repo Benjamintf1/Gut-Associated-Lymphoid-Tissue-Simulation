@@ -2,6 +2,11 @@
 
 
 using namespace std;
+
+//struct tiv:
+//Stores three double values representing the
+//population of T-cells, Infected cells, and Viroids
+//per volume at a point.
 struct tiv{
 	double t;
 	double i;
@@ -9,28 +14,29 @@ struct tiv{
 
 }
 int main (int argc, char** argv){
-	double diffusion_tcells;
-	double diffusion_infected;
-	double diffusion_virus;
-	double death_tcells;
-	double death_infected;
-	double death_virus;
-	double burst_rate;
-	double transmission_vt;
-	double transmission_it;
-	double delta_t;
-	double delta_space;
-	double grid_width;
-	double grid_height;
-	double number_of_time_steps;
+	//INPUT VARIABLES
+	double diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
+	double diffusion_infected; //D_I: The rate at which infected cells diffuse spatially
+	double diffusion_virus; //D_V: The rate at which viroids diffuse spatially (generally, > D_I or D_T)
+	double death_tcells; //d_T: The death rate of T-cells (from natural deaths)
+	double death_infected; //d_I: The death rate of infected cells
+	double death_virus; //d_V: The death rate of viroids
+	double burst_rate; //N: The amount of viroids created when an infected cell bursts
+	double transmission_vt; //k1: The rate of infection when T-cells and Viroids are near
+	double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
+	double delta_t; //The time step length
+	double delta_space; //The spatial step length (evenly sized in x and y)
+	double grid_width; //The number of x steps
+	double grid_height; //The number of y steps
+	double number_of_time_steps; //The number of time steps
 	
-	tiv** TIV;
-	tiv** TIV_next;	
+	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
+	tiv** TIV_next;	//Used to temporarily store the next time step's data.
 
-	double** tcell_birth_rate;
+	double** tcell_birth_rate; //Lambda: A given matrix of where T-cells are produced/generated into the system.
 	
 
-
+	//Variables to read the birth rate from file:
 	string birth_rate_filename;
 	ifstream birth_rate_file;
 	
@@ -43,6 +49,8 @@ int main (int argc, char** argv){
 		}
 	}
 	birth_rate_file.close();
+	
+	//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
 	double a4 = delta_t * diffusion_tcells / pow(delta_space, 2);
 	double a3 = delta_t * transmission_it;
 	double a2 = delta_t * transmission_vt;
@@ -57,10 +65,13 @@ int main (int argc, char** argv){
 	double c2 = delta_t * burst_rate * death_infected; 
 	double c1 = 1 - 4 * c3 - delta_t * death_virus; 
 	
+	//Initializing TIV_next
 	TIV_next = new tiv*[grid_height];
 	for(int i = 0; i < grid_height; ++i ){
 		TIV_next[i] = new tiv[grid_width];
 	}
+	
+	// The brunt of the code (TIV_next from TIV)
 	for(int n = 0; n < number_of_time_steps; ++n){
 
 		for(int i = 1; i < grid_height-1; ++i){
