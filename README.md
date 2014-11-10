@@ -23,7 +23,7 @@ A configuration file should be a file with one double, integer, or string value 
 * (double) delta_space:
 * (integer) grid_width
 * (integer) grid_height:
-* (integer) number_of_time_steps:
+* (integer) number_of_timesteps:
 * (string) birth_rate_filename:
 * (string) t_file_name:
 * (string) i_file_name:
