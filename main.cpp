@@ -47,8 +47,6 @@ int main (int argc, char** argv){
 	
 	ifstream birth_rate_file;
 	
-	ifstream i_file;
-	ifstream v_file;
 	
 	
 	//TODO: read cofig file
@@ -59,6 +57,9 @@ int main (int argc, char** argv){
 
 	ifstream config_file(argv[1]);
 
+
+	
+	config_file.close();
 	ifstream t_file(t_file_name);
 	ifstream i_file(i_file_name);
 	ifstream v_file(v_file_name);
