@@ -1,7 +1,7 @@
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof
-#include <iostream> //cout
+
 using namespace std;
 
 //struct tiv:
@@ -84,9 +84,8 @@ int main (int argc, char** argv){
 	config_file.close();
 
 
-	cout << result_t_filename;
 
-	/*
+	
 	ifstream t_file(t_filename);
 	ifstream i_file(i_filename);
 	ifstream v_file(v_filename);
@@ -164,6 +163,6 @@ int main (int argc, char** argv){
 
 	
         birth_rate_file.close();
-	*/
+	
 	return 0;
 }
