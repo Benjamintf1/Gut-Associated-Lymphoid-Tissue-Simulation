@@ -1,6 +1,7 @@
-#include <fstream>
-#include <cmath>
-
+#include <fstream>  //input/output from files
+#include <cmath>    //pow
+#include <stdlib.h> //atof
+#include <iostream> //cout
 using namespace std;
 
 //struct tiv:
@@ -28,7 +29,7 @@ int main (int argc, char** argv){
 	double delta_space; //The spatial step length (evenly sized in x and y)
 	int grid_width; //The number of x steps
 	int grid_height; //The number of y steps
-	int number_of_time_steps; //The number of time steps
+	int number_of_timesteps; //The number of time steps
 	
 	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
 	tiv** TIV_next;	//Used to temporarily store the next time step's data.
@@ -37,32 +38,58 @@ int main (int argc, char** argv){
 	
 	//Variables for reading/writing materices from files:
 	string birth_rate_filename;
-	string t_file_name;
-	string i_file_name;
-	string v_file_name;
+	string t_filename;
+	string i_filename;
+	string v_filename;
 	
-	string result_t_file_name;
-	string result_i_file_name;
-	string result_v_file_name;
+	string result_t_filename;
+	string result_i_filename;
+	string result_v_filename;
 	
 	ifstream birth_rate_file;
 	
 	
 	
-	//TODO: read cofig file
+
 	if(argc < 2){
 		printf("You must give the program a configuration file. Check the readme for how the config file should be formatted");
 		exit(1); // we cannot continue without the config
 	}
 
+
+
 	ifstream config_file(argv[1]);
-
-
+	
+	config_file >> diffusion_tcells;
+	config_file >> diffusion_infected;
+	config_file >> diffusion_virus;
+	config_file >> death_tcells;
+	config_file >> death_infected;
+	config_file >> death_virus;
+	config_file >> transmission_vt;
+	config_file >> transmission_it;
+	config_file >> delta_t;
+	config_file >> delta_space;
+	config_file >> grid_width;
+	config_file >> grid_height;
+	config_file >> number_of_timesteps;
+	config_file >> birth_rate_filename;
+	config_file >> t_filename;
+	config_file >> i_filename;
+	config_file >> v_filename;
+	config_file >> result_t_filename;
+	config_file >> result_i_filename;
+	config_file >> result_v_filename;
 	
 	config_file.close();
-	ifstream t_file(t_file_name);
-	ifstream i_file(i_file_name);
-	ifstream v_file(v_file_name);
+
+
+	cout << result_t_filename;
+
+	/*
+	ifstream t_file(t_filename);
+	ifstream i_file(i_filename);
+	ifstream v_file(v_filename);
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
                         t_file.read(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
@@ -105,7 +132,7 @@ int main (int argc, char** argv){
 	}
 	
 	// The brunt of the code (TIV_next from TIV)
-	for(int n = 0; n < number_of_time_steps; ++n){
+	for(int n = 0; n < number_of_timesteps; ++n){
 
 		for(int i = 1; i < grid_height-1; ++i){
                 	for(int j = 1; j < grid_width-1; ++j){
@@ -118,9 +145,9 @@ int main (int argc, char** argv){
                 	}
         	}
 	}
-	ofstream result_t_file(result_t_file_name.c_str(), ios::out |ios::binary);
-	ofstream result_i_file(result_i_file_name.c_str(), ios::out |ios::binary);
-	ofstream result_v_file(result_v_file_name.c_str(), ios::out |ios::binary);
+	ofstream result_t_file(result_t_filename.c_str(), ios::out |ios::binary);
+	ofstream result_i_file(result_i_filename.c_str(), ios::out |ios::binary);
+	ofstream result_v_file(result_v_filename.c_str(), ios::out |ios::binary);
 	
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
@@ -137,5 +164,6 @@ int main (int argc, char** argv){
 
 	
         birth_rate_file.close();
+	*/
 	return 0;
 }
