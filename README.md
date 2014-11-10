@@ -25,10 +25,10 @@ A configuration file should be a file with one double, integer, or string value 
 * (integer) grid_height:
 * (integer) number_of_timesteps:
 * (string) birth_rate_filename:
-* (string) t_file_name:
-* (string) i_file_name:
-* (string) v_file_name:
-* (string) result_t_file_name:
-* (string) result_i_file_name:
-* (string) result_v_file_name:
+* (string) t_filename:
+* (string) i_filename:
+* (string) v_filename:
+* (string) result_t_filename:
+* (string) result_i_filename:
+* (string) result_v_filename:
 
