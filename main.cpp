@@ -1,5 +1,5 @@
 #include <fstream>
-
+#include <cmath>
 
 using namespace std;
 
@@ -12,7 +12,7 @@ struct tiv{
 	double i;
 	double v;
 
-}
+};
 int main (int argc, char** argv){
 	//INPUT VARIABLES
 	double diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
@@ -26,21 +26,53 @@ int main (int argc, char** argv){
 	double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
 	double delta_t; //The time step length
 	double delta_space; //The spatial step length (evenly sized in x and y)
-	double grid_width; //The number of x steps
-	double grid_height; //The number of y steps
-	double number_of_time_steps; //The number of time steps
+	int grid_width; //The number of x steps
+	int grid_height; //The number of y steps
+	int number_of_time_steps; //The number of time steps
 	
 	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
 	tiv** TIV_next;	//Used to temporarily store the next time step's data.
 
 	double** tcell_birth_rate; //Lambda: A given matrix of where T-cells are produced/generated into the system.
 	
-
-	//Variables to read the birth rate from file:
+	//Variables for reading/writing materices from files:
 	string birth_rate_filename;
+	string t_file_name;
+	string i_file_name;
+	string v_file_name;
+	
+	string result_t_file_name;
+	string result_i_file_name;
+	string result_v_file_name;
+	
 	ifstream birth_rate_file;
 	
-	//todo: setup the config 
+	ifstream i_file;
+	ifstream v_file;
+	
+	
+	//TODO: read cofig file
+	if(argc < 2){
+		printf("You must give the program a configuration file. Check the readme for how the config file should be formatted");
+		exit(1); // we cannot continue without the config
+	}
+
+	ifstream config_file(argv[1]);
+
+	ifstream t_file(t_file_name);
+	ifstream i_file(i_file_name);
+	ifstream v_file(v_file_name);
+	for(int i = 0; i < grid_height; ++i){
+                for(int j = 0; j < grid_width; ++j){
+                        t_file.read(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
+			i_file.read(reinterpret_cast<char *>(&TIV[i][j].i), sizeof(TIV[i][j].i));
+			v_file.read(reinterpret_cast<char *>(&TIV[i][j].v), sizeof(TIV[i][j].v));
+                }
+        }
+	t_file.close();
+	i_file.close();
+	v_file.close();
+	
 	birth_rate_file.open(birth_rate_filename.c_str(), std::ios::in | std::ios::binary);
 	for(int i = 1; i < grid_height-1; ++i){
 		for(int j = 1; j < grid_width-1; ++j){
@@ -85,7 +117,24 @@ int main (int argc, char** argv){
                 	}
         	}
 	}
+	ofstream result_t_file(result_t_file_name.c_str(), ios::out |ios::binary);
+	ofstream result_i_file(result_i_file_name.c_str(), ios::out |ios::binary);
+	ofstream result_v_file(result_v_file_name.c_str(), ios::out |ios::binary);
+	
+	for(int i = 0; i < grid_height; ++i){
+                for(int j = 0; j < grid_width; ++j){
+                        result_t_file.write(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
+			result_i_file.write(reinterpret_cast<char *>(&TIV[i][j].i), sizeof(TIV[i][j].i));
+			result_v_file.write(reinterpret_cast<char *>(&TIV[i][j].v), sizeof(TIV[i][j].v));
+                }
+        }
+
+	result_t_file.close();
+	result_i_file.close();
+	result_v_file.close();
 
 
+	
+        birth_rate_file.close();
 	return 0;
 }
