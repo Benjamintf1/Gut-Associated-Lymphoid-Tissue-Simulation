@@ -6,10 +6,12 @@
 
 
 
-
+#include <iostream> 
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof
+#include "binary_read_write.h"  //template<typename T>
+
 
 using namespace std;
 
@@ -100,7 +102,7 @@ int main (int argc, char** argv){
 	ifstream v_file(v_filename.c_str());
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
-                        t_file.read(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
+                        binary_read(t_file , TIV[i][j].t);
 			i_file.read(reinterpret_cast<char *>(&TIV[i][j].i), sizeof(TIV[i][j].i));
 			v_file.read(reinterpret_cast<char *>(&TIV[i][j].v), sizeof(TIV[i][j].v));
                 }
