@@ -86,9 +86,9 @@ int main (int argc, char** argv){
 
 
 	
-	ifstream t_file(t_filename);
-	ifstream i_file(i_filename);
-	ifstream v_file(v_filename);
+	ifstream t_file(t_filename.c_str());
+	ifstream i_file(i_filename.c_str());
+	ifstream v_file(v_filename.c_str());
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
                         t_file.read(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
