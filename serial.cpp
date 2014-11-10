@@ -1,3 +1,12 @@
+/*
+
+	This is the serial version of the code to generat the Virus, Infected and Viral population grid over a number of timesteps.
+	
+*/
+
+
+
+
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof
