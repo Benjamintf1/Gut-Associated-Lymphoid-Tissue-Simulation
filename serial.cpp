@@ -6,7 +6,6 @@
 
 
 
-#include <iostream> 
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof
