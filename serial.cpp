@@ -117,8 +117,8 @@ int main (int argc, char** argv){
 	
 	//READING the birth rate file (lambda) into a matrix
 	birth_rate_file.open(birth_rate_filename.c_str(), std::ios::in | std::ios::binary);
-	for(int i = 1; i < grid_height-1; ++i){
-		for(int j = 1; j < grid_width-1; ++j){
+	for(int i = 0; i < grid_height; ++i){
+		for(int j = 0; j < grid_width; ++j){
 			birth_rate_file.read(reinterpret_cast<char *>(&tcell_birth_rate[i][j]), sizeof(tcell_birth_rate[i][j]));
 			tcell_birth_rate[i][j] *= delta_t;
 		}
