@@ -83,6 +83,7 @@ int main (int argc, char** argv){
 	config_file >> death_tcells;
 	config_file >> death_infected;
 	config_file >> death_virus;
+	config_file >> burst_rate;
 	config_file >> transmission_vt;
 	config_file >> transmission_it;
 	config_file >> delta_t;

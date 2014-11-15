@@ -24,6 +24,7 @@ A configuration file should be a file with one double, integer, or string value 
 * (double) death_tcells:
 * (double) death_infected:
 * (double) death_virus:
+* (integer) burst_rate:
 * (double) transmission_vt:
 * (double) transmission_it:
 * (double) delta_t:
