@@ -27,6 +27,9 @@ struct tiv{
 };
 int main (int argc, char** argv){
 	//INPUT VARIABLES
+	double delta_space; //The spatial step length (evenly sized in x and y)
+	int grid_width; //The number of x steps
+	int grid_height; //The number of y steps
 	double diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
 	double diffusion_infected; //D_I: The rate at which infected cells diffuse spatially
 	double diffusion_virus; //D_V: The rate at which viroids diffuse spatially (generally, > D_I or D_T)
@@ -37,9 +40,6 @@ int main (int argc, char** argv){
 	double transmission_vt; //k1: The rate of infection when T-cells and Viroids are near
 	double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
 	double delta_t; //The time step length
-	double delta_space; //The spatial step length (evenly sized in x and y)
-	int grid_width; //The number of x steps
-	int grid_height; //The number of y steps
 	int number_of_timesteps; //The number of time steps
 	
 	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
@@ -70,7 +70,14 @@ int main (int argc, char** argv){
 
 
 	ifstream config_file(argv[1]);
-	
+
+	config_file >> delta_space;
+	config_file >> grid_width;
+	config_file >> grid_height;
+	config_file >> birth_rate_filename;
+	config_file >> t_filename;
+	config_file >> i_filename;
+	config_file >> v_filename;
 	config_file >> diffusion_tcells;
 	config_file >> diffusion_infected;
 	config_file >> diffusion_virus;
@@ -80,14 +87,7 @@ int main (int argc, char** argv){
 	config_file >> transmission_vt;
 	config_file >> transmission_it;
 	config_file >> delta_t;
-	config_file >> delta_space;
-	config_file >> grid_width;
-	config_file >> grid_height;
 	config_file >> number_of_timesteps;
-	config_file >> birth_rate_filename;
-	config_file >> t_filename;
-	config_file >> i_filename;
-	config_file >> v_filename;
 	config_file >> result_t_filename;
 	config_file >> result_i_filename;
 	config_file >> result_v_filename;
