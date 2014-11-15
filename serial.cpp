@@ -95,7 +95,11 @@ int main (int argc, char** argv){
 	config_file.close();
 
 
-
+	//Initializing TIV
+	TIV = new tiv*[grid_height];
+	for(int i = 0; i < grid_height; ++i ){
+		TIV[i] = new tiv[grid_width];
+	}
 	//READING the T, I, and V files into the TIV matrix (opening files, reading for each i/j, closing files)
 	ifstream t_file(t_filename.c_str());
 	ifstream i_file(i_filename.c_str());
@@ -143,8 +147,9 @@ int main (int argc, char** argv){
 	}
 	
 	// The brunt of the code (TIV_next from TIV)
-	for(int n = 0; n < number_of_timesteps; ++n){
+	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 
+		//First calculate TIV_next (the state of T,I,V populations next time step)
 		for(int i = 1; i < grid_height-1; ++i){
                 	for(int j = 1; j < grid_width-1; ++j){
 				TIV_next[i][j].t = TIV[i][j].t * (a1 - a2 * TIV[i][j].v - a3 * TIV[i][j].i) + tcell_birth_rate[i][j] 
@@ -155,6 +160,11 @@ int main (int argc, char** argv){
 	                       
                 	}
         	}
+        	
+        	//Then make TIV_next the new TIV (stepping forward in time)
+        	double** temp_TIV = TIV;
+        	TIV = TIV_next;
+        	TIV_next = temp_TIV;
 	}
 	
 	//WRITING the TIV matrix elements into "result" files t,i, and v.
