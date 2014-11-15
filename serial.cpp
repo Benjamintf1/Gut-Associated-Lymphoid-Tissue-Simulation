@@ -96,21 +96,22 @@ int main (int argc, char** argv){
 
 
 
-	
+	//READING the T, I, and V files into the TIV matrix (opening files, reading for each i/j, closing files)
 	ifstream t_file(t_filename.c_str());
 	ifstream i_file(i_filename.c_str());
 	ifstream v_file(v_filename.c_str());
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
                         binary_read(t_file , TIV[i][j].t);
-			i_file.read(reinterpret_cast<char *>(&TIV[i][j].i), sizeof(TIV[i][j].i));
-			v_file.read(reinterpret_cast<char *>(&TIV[i][j].v), sizeof(TIV[i][j].v));
+                        binary_read(i_file , TIV[i][j].i);
+                        binary_read(v_file , TIV[i][j].v);
                 }
         }
 	t_file.close();
 	i_file.close();
 	v_file.close();
 	
+	//READING the birth rate file (lambda) into a matrix
 	birth_rate_file.open(birth_rate_filename.c_str(), std::ios::in | std::ios::binary);
 	for(int i = 1; i < grid_height-1; ++i){
 		for(int j = 1; j < grid_width-1; ++j){
@@ -155,25 +156,22 @@ int main (int argc, char** argv){
                 	}
         	}
 	}
+	
+	//WRITING the TIV matrix elements into "result" files t,i, and v.
 	ofstream result_t_file(result_t_filename.c_str(), ios::out |ios::binary);
 	ofstream result_i_file(result_i_filename.c_str(), ios::out |ios::binary);
 	ofstream result_v_file(result_v_filename.c_str(), ios::out |ios::binary);
-	
 	for(int i = 0; i < grid_height; ++i){
                 for(int j = 0; j < grid_width; ++j){
-                        result_t_file.write(reinterpret_cast<char *>(&TIV[i][j].t), sizeof(TIV[i][j].t));
-			result_i_file.write(reinterpret_cast<char *>(&TIV[i][j].i), sizeof(TIV[i][j].i));
-			result_v_file.write(reinterpret_cast<char *>(&TIV[i][j].v), sizeof(TIV[i][j].v));
+                	binary_write(result_t_file , TIV[i][j].t);
+                        binary_write(result_i_file , TIV[i][j].i);
+                        binary_write(result_v_file , TIV[i][j].v);
                 }
         }
 
 	result_t_file.close();
 	result_i_file.close();
 	result_v_file.close();
-
-
-	
-        birth_rate_file.close();
 	
 	return 0;
 }
