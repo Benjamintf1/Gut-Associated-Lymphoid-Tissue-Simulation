@@ -43,10 +43,10 @@ int main(int argc, char* argv){
 
 	for(int i = 0; i < grid_height; ++i){
 		for(int j = 0; j < grid_width; ++j){
-			binary_write(generated_t_file , generate_T(i, j, grid_height, grid_width, delta_space));
-			binary_write(generated_i_file , generate_I(i, j, grid_height, grid_width, delta_space));
-			binary_write(generated_v_file , generate_V(i, j, grid_height, grid_width, delta_space));
-			binary_write(generated_birth_file, generate_birth(i, j, grid_height, grid_width, delta_space));
+			binary_write(generated_t_file , generate_T(i, j, grid_width, grid_height, delta_space));
+			binary_write(generated_i_file , generate_I(i, j, grid_width, grid_height, delta_space));
+			binary_write(generated_v_file , generate_V(i, j, grid_width, grid_height, delta_space));
+			binary_write(generated_birth_file, generate_birth(i, j, grid_width, grid_height, delta_space));
 		}
 	}
 
