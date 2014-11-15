@@ -1,9 +1,11 @@
 #include <fstream>  //input/output from files
+#include <stdlib.h> //exit
+#include "binary_read_write.h"  //Wrappers to read and write to binary file
 #include "generators.h"
 
 using namespace std;
 
-int main(int argc, char* argv){
+int main(int argc, char** argv){
 
 	
 	if(argc < 2){

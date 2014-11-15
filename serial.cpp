@@ -8,9 +8,8 @@
 
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
-#include <stdlib.h> //atof
-#include "binary_read_write.h"  //template<typename T>
-
+#include <stdlib.h> //atof and exit
+#include "binary_read_write.h" //Wrappers to read and write to binary file
 
 using namespace std;
 
@@ -114,6 +113,13 @@ int main (int argc, char** argv){
 	t_file.close();
 	i_file.close();
 	v_file.close();
+
+	//Initializing birth rate matrix
+	
+	tcell_birth_rate = new double*[grid_width];
+	for(int i = 0; i < grid_height; ++i ){
+		tcell_birth_rate[i] = new double[grid_width];
+	} 
 	
 	//READING the birth rate file (lambda) into a matrix
 	birth_rate_file.open(birth_rate_filename.c_str(), std::ios::in | std::ios::binary);
@@ -162,7 +168,7 @@ int main (int argc, char** argv){
         	}
         	
         	//Then make TIV_next the new TIV (stepping forward in time)
-        	double** temp_TIV = TIV;
+        	tiv** temp_TIV = TIV;
         	TIV = TIV_next;
         	TIV_next = temp_TIV;
 	}
