@@ -26,6 +26,9 @@ struct tiv{
 };
 int main (int argc, char** argv){
 	//INPUT VARIABLES
+	double delta_space; //The spatial step length (evenly sized in x and y)
+	int grid_width; //The number of x steps
+	int grid_height; //The number of y steps
 	double diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
 	double diffusion_infected; //D_I: The rate at which infected cells diffuse spatially
 	double diffusion_virus; //D_V: The rate at which viroids diffuse spatially (generally, > D_I or D_T)
@@ -36,9 +39,6 @@ int main (int argc, char** argv){
 	double transmission_vt; //k1: The rate of infection when T-cells and Viroids are near
 	double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
 	double delta_t; //The time step length
-	double delta_space; //The spatial step length (evenly sized in x and y)
-	int grid_width; //The number of x steps
-	int grid_height; //The number of y steps
 	int number_of_timesteps; //The number of time steps
 	
 	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
@@ -69,7 +69,14 @@ int main (int argc, char** argv){
 
 
 	ifstream config_file(argv[1]);
-	
+
+	config_file >> delta_space;
+	config_file >> grid_width;
+	config_file >> grid_height;
+	config_file >> birth_rate_filename;
+	config_file >> t_filename;
+	config_file >> i_filename;
+	config_file >> v_filename;
 	config_file >> diffusion_tcells;
 	config_file >> diffusion_infected;
 	config_file >> diffusion_virus;
@@ -79,14 +86,7 @@ int main (int argc, char** argv){
 	config_file >> transmission_vt;
 	config_file >> transmission_it;
 	config_file >> delta_t;
-	config_file >> delta_space;
-	config_file >> grid_width;
-	config_file >> grid_height;
 	config_file >> number_of_timesteps;
-	config_file >> birth_rate_filename;
-	config_file >> t_filename;
-	config_file >> i_filename;
-	config_file >> v_filename;
 	config_file >> result_t_filename;
 	config_file >> result_i_filename;
 	config_file >> result_v_filename;
@@ -94,7 +94,11 @@ int main (int argc, char** argv){
 	config_file.close();
 
 
-
+	//Initializing TIV
+	TIV = new tiv*[grid_height];
+	for(int i = 0; i < grid_height; ++i ){
+		TIV[i] = new tiv[grid_width];
+	}
 	//READING the T, I, and V files into the TIV matrix (opening files, reading for each i/j, closing files)
 	ifstream t_file(t_filename.c_str());
 	ifstream i_file(i_filename.c_str());
@@ -142,8 +146,9 @@ int main (int argc, char** argv){
 	}
 	
 	// The brunt of the code (TIV_next from TIV)
-	for(int n = 0; n < number_of_timesteps; ++n){
+	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 
+		//First calculate TIV_next (the state of T,I,V populations next time step)
 		for(int i = 1; i < grid_height-1; ++i){
                 	for(int j = 1; j < grid_width-1; ++j){
 				TIV_next[i][j].t = TIV[i][j].t * (a1 - a2 * TIV[i][j].v - a3 * TIV[i][j].i) + tcell_birth_rate[i][j] 
@@ -154,6 +159,11 @@ int main (int argc, char** argv){
 	                       
                 	}
         	}
+        	
+        	//Then make TIV_next the new TIV (stepping forward in time)
+        	double** temp_TIV = TIV;
+        	TIV = TIV_next;
+        	TIV_next = temp_TIV;
 	}
 	
 	//WRITING the TIV matrix elements into "result" files t,i, and v.
