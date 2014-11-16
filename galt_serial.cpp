@@ -4,8 +4,6 @@
 	
 */
 
-#include <iostream>
-
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof and exit
@@ -190,10 +188,6 @@ int main (int argc, char** argv){
 	result_i_file.close();
 	result_v_file.close();
 
-
-	cout << a1 << " " << a2 << " "<< a3 << " " << a4 << endl;
-	cout << b1 << " " << b2 << " "<< b3 << " " << b4 << endl;
-	cout << c1 << " " << c2 << " "<< c3  << endl;
 	
 	return 0;
 }
