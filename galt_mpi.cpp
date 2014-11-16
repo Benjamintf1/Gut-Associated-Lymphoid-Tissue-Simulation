@@ -1,6 +1,6 @@
 /*
 
-	This is the serial version of the code to generat the Virus, Infected and Viral population grid over a number of timesteps.
+	This is the pure MPI version of the code to generate the T-Cell, Infected and Viroid population grid over a number of timesteps.
 	
 */
 //TODO: make parallel
@@ -29,6 +29,9 @@ int main (int argc, char** argv){
 	//START OF PARALLEL
 	MPI::Init(argc, argv);
 	
+	int rank = MPI::COMM_WORLD.Get_rank();
+	int nprocs = MPI::COMM_WORLD.Get_size();
+
 	if(rank == master){
 		if(argc < 4){
 			fprintf(stderr, "Not enough command line arguments, check the readme to see how to configure.\n");
@@ -44,8 +47,7 @@ int main (int argc, char** argv){
 	MPI_Type_contiguous(3, MPI::DOUBLE, &mpi_tiv);  //we need to create a mpi version of this data type so we can send and recieve it
 	MPI_Type_commit(&mpi_tiv);
 
-	int rank = MPI::COMM_WORLD.Get_rank();
-	int nprocs = MPI::COMM_WORLD.Get_size();
+	
 
 	int nprocs_x = atoi(argv[2]);
 	int nprocs_y = atoi(argv[3]);
@@ -186,7 +188,7 @@ int main (int argc, char** argv){
 	}
 	
 
-	MPI::COMM_WORLD.Bcast(( broadcast_array, 11, MPI::DOUBLE, master );
+	MPI::COMM_WORLD.Bcast( broadcast_array, 11, MPI::DOUBLE, master );
 
 	a1 = broadcast_array[0];
 	a2 = broadcast_array[1];
@@ -202,6 +204,11 @@ int main (int argc, char** argv){
 
 	local_grid_width = broadcast_array[11];
 	local_grid_height = broadcast_array[12];
+	
+	int local_grid_size = local_grid_height * local_grid_width;
+	
+
+
 	
 	if(rank == master){
 		//Initializing TIV
@@ -241,19 +248,66 @@ int main (int argc, char** argv){
 		}
 		birth_rate_file.close();
 
-
+		//Setting up Buffers to split the matrices
+		tiv** TIV_buffers = new tiv* [nprocs_used];
+		for(int i = 0; i < nprocs_used; ++i ){
+			TIV_buffers[i] = new tiv[local_grid_size];
+		}
+		double** birth_rate_buffers = new double* [nprocs_used];
+		for(int i = 0; i < nprocs_used; ++i ){
+			birth_rate_buffers[i] = new double[local_grid_size];
+		}
+		//Splitting the Matrices
+		int proc_x, proc_y; //The processor's x and y coordinates
+		for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
+			proc_x = k % nprocs_x;
+			proc_y = k / nprocs_x;
+			
+			int n = 0; //location in buffer
+			
+			for(int i = (proc_y * local_grid_height) - proc_y; i <= (proc_y + 1) * local_grid_height - proc_y; ++i) {
+				for(int j = (proc_x * local_grid_width) - proc_x; j <= (proc_x + 1) * local_grid_width - proc_x; ++j) {
+					TIV_buffers[k][n] = TIV[i][j];
+					birth_rate_buffers[k][n] = tcell_birth_rate[i][j];
+					++n;
+				}
+			}
+			
+			MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
+			MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
+		}
+		
+		//Deallocating the no longer needed TIV and t_cell_birth_rate matrices:
+		for(int i = 0; i < grid_height; ++i ){
+			delete[] TIV[i];
+			delete[] tcell_birth_rate[i];
+		}
+		delete[] TIV;
+		delete[] tcell_birth_rate;
+		
 	}
-	//TODO: split matrix
-
-
-
 	
+	tiv* local_TIV = new tiv[local_grid_size];
+	double* local_birth = new double[local_grid_size];
+
+	MPI_Request master_recieve[2];
+	master_recieve[0] = MPI::COMM_WORLD.Irecv(local_TIV, local_grid_size, mpi_tiv, master, 1);
+	master_recieve[1] = MPI::COMM_WORLD.Irecv(local_birth, local_grid_size, MPI::DOUBLE, master, 2);
+	
+	
+	MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
 	//Initializing TIV_next
 	
 	// The brunt of the code (TIV_next from TIV)
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
-
+		
 		//TODO: needs to do what it says in green notes
+			//Wait to Receive step n data from its 2-4 bordering processors.
+				//if n = 0, just wait to make sure the MPI Receive from master went through
+			//Calculate TIV step n+1 (store in TIV_next) from TIV step n (stored in TIV)
+			//Asynch Receive step n+1 data from bordering processors. Store into TIV_next
+			//Asynch Send step n+1 data to bordering processors (this is stored in TIV_next)
+			//Switch pointers of TIV and TIV_next (this shouldn't disrupt send or receives)
 	}
 	
 	//TODO: recombine matrix
