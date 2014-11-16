@@ -27,6 +27,15 @@ struct tiv{
 int main (int argc, char** argv){
 	//START OF PARALLEL
 	MPI::Init(argc, argv);
+	
+
+	if(argc < 4){
+		printf("Not enough command line arguments, check the readme to see how to configure.");
+		exit(1); // we cannot continue without the config or divisions
+	}
+
+
+
 
 	MPI_Datatype mpi_tiv;
 
@@ -36,6 +45,17 @@ int main (int argc, char** argv){
 
 	int rank = MPI::COMM_WORLD.Get_rank();
 	int nprocs = MPI::COMM_WORLD.Get_size();
+
+	int nproc_x = atoi(argv[2]);
+	int nproc_y = atoi(argv[3]);
+
+	int nprocs_used = nproc_x * nproc_y ;
+	if(nprocs_used > nprocs){
+		printf("you need to give the program more processors, the input says it requires %d processors, and you only gave it %d",nprocs_used, nprocs );
+		exit(2); //We dont have enough processors
+	} else if ( nprocs_used != nprocs){
+		printf("Warning: not all processors are being utilized");
+	}
 	
 	//INPUT VARIABLES
 	double delta_space; //The spatial step length (evenly sized in x and y)
@@ -72,10 +92,7 @@ int main (int argc, char** argv){
 	
 	
 	if(rank == master){
-		if(argc < 2){
-			printf("You must give the program a configuration file. Check the readme for how the config file should be formatted");
-			exit(1); // we cannot continue without the config
-		}
+		
 
 
 
