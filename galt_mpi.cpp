@@ -95,6 +95,10 @@ int main (int argc, char** argv){
 	string result_v_filename;
 	
 	ifstream birth_rate_file;
+
+
+	//derived variables
+	double a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3;
 	
 	
 	double broadcast_array[13];
@@ -144,19 +148,19 @@ int main (int argc, char** argv){
 
 
 		//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
-		double a4 = delta_t * diffusion_tcells / pow(delta_space, 2);
-		double a3 = delta_t * transmission_it;
-		double a2 = delta_t * transmission_vt;
-		double a1 = 1 - 4 * a4 - delta_t * death_tcells;
+		a4 = delta_t * diffusion_tcells / pow(delta_space, 2);
+		a3 = delta_t * transmission_it;
+		a2 = delta_t * transmission_vt;
+		a1 = 1 - 4 * a4 - delta_t * death_tcells;
 
-		double b4 = delta_t * diffusion_infected / pow(delta_space, 2);
-		double b3 = a2;
-		double b2 = a3;
-		double b1 = 1 - 4 * b4 - delta_t * death_infected;
+		b4 = delta_t * diffusion_infected / pow(delta_space, 2);
+		b3 = a2;
+		b2 = a3;
+		b1 = 1 - 4 * b4 - delta_t * death_infected;
 	
-		double c3 = delta_t * diffusion_virus / pow(delta_space, 2);
-		double c2 = delta_t * burst_rate * death_infected; 
-		double c1 = 1 - 4 * c3 - delta_t * death_virus; 
+		c3 = delta_t * diffusion_virus / pow(delta_space, 2);
+		c2 = delta_t * burst_rate * death_infected; 
+		c1 = 1 - 4 * c3 - delta_t * death_virus; 
 		
 
 		broadcast_array[0] = a1;
@@ -240,6 +244,8 @@ int main (int argc, char** argv){
 
 	}
 	//TODO: split matrix
+
+
 
 	
 	//Initializing TIV_next
