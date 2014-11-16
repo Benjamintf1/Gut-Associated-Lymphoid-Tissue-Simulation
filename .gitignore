@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+#data files
+*.dat
+
+#compiled code
+sim_s
+gen_files_simple
+

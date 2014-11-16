@@ -4,11 +4,12 @@
 	
 */
 
-
+#include <iostream>
 
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof and exit
+#include <algorithm> //max
 #include "binary_read_write.h" //Wrappers to read and write to binary file
 
 using namespace std;
@@ -158,11 +159,11 @@ int main (int argc, char** argv){
 		//First calculate TIV_next (the state of T,I,V populations next time step)
 		for(int i = 1; i < grid_height-1; ++i){
                 	for(int j = 1; j < grid_width-1; ++j){
-				TIV_next[i][j].t = TIV[i][j].t * (a1 - a2 * TIV[i][j].v - a3 * TIV[i][j].i) + tcell_birth_rate[i][j] 
-						 + a4 * (TIV[i+1][j].t + TIV[i-1][j].t + TIV[i][j+1].t + TIV[i][j-1].t );
-				TIV_next[i][j].i = TIV[i][j].i * (b1 + b2*TIV[i][j].t) + b3 * TIV[i][j].t * TIV[i][j].v 
-						 + b4 * (TIV[i+1][j].i + TIV[i-1][j].i + TIV[i][j+1].i + TIV[i][j-1].i ); 			
-				TIV_next[i][j].v = TIV[i][j].v * c1 + c2 * TIV[i][j].i + c3 * (TIV[i+1][j].v + TIV[i-1][j].v + TIV[i][j+1].v + TIV[i][j-1].v );
+				TIV_next[i][j].t = max(TIV[i][j].t * (a1 - a2 * TIV[i][j].v - a3 * TIV[i][j].i) + tcell_birth_rate[i][j] 
+						 + a4 * (TIV[i+1][j].t + TIV[i-1][j].t + TIV[i][j+1].t + TIV[i][j-1].t ), 0.0);
+				TIV_next[i][j].i = max(TIV[i][j].i * (b1 + b2*TIV[i][j].t) + b3 * TIV[i][j].t * TIV[i][j].v 
+						 + b4 * (TIV[i+1][j].i + TIV[i-1][j].i + TIV[i][j+1].i + TIV[i][j-1].i ), 0.0); 			
+				TIV_next[i][j].v = max(TIV[i][j].v * c1 + c2 * TIV[i][j].i + c3 * (TIV[i+1][j].v + TIV[i-1][j].v + TIV[i][j+1].v + TIV[i][j-1].v ), 0.0);
 	                       
                 	}
         	}
@@ -188,6 +189,11 @@ int main (int argc, char** argv){
 	result_t_file.close();
 	result_i_file.close();
 	result_v_file.close();
+
+
+	cout << a1 << " " << a2 << " "<< a3 << " " << a4 << endl;
+	cout << b1 << " " << b2 << " "<< b3 << " " << b4 << endl;
+	cout << c1 << " " << c2 << " "<< c3  << endl;
 	
 	return 0;
 }
