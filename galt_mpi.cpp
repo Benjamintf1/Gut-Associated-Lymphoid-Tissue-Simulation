@@ -3,15 +3,16 @@
 	This is the serial version of the code to generat the Virus, Infected and Viral population grid over a number of timesteps.
 	
 */
+//TODO: make parallel
 #define master 0
-#include <iostream>
-#include <mpi.h>
+
+#include <mpi.h>  //This is an mpi program...
 #include <fstream>  //input/output from files
 #include <cmath>    //pow
 #include <stdlib.h> //atof and exit
 #include <algorithm> //max
 #include "binary_read_write.h" //Wrappers to read and write to binary file
-
+#include <errno.h> //stderr
 using namespace std;
 
 //struct tiv:
@@ -28,12 +29,12 @@ int main (int argc, char** argv){
 	//START OF PARALLEL
 	MPI::Init(argc, argv);
 	
-
-	if(argc < 4){
-		printf("Not enough command line arguments, check the readme to see how to configure.");
-		exit(1); // we cannot continue without the config or divisions
+	if(rank == master){
+		if(argc < 4){
+			fprintf(stderr, "Not enough command line arguments, check the readme to see how to configure.\n");
+			MPI_Abort(MPI_COMM_WORLD, 1); // we cannot continue without the config or divisions
+		}
 	}
-
 
 
 
@@ -46,15 +47,19 @@ int main (int argc, char** argv){
 	int rank = MPI::COMM_WORLD.Get_rank();
 	int nprocs = MPI::COMM_WORLD.Get_size();
 
-	int nproc_x = atoi(argv[2]);
-	int nproc_y = atoi(argv[3]);
+	int nprocs_x = atoi(argv[2]);
+	int nprocs_y = atoi(argv[3]);
 
-	int nprocs_used = nproc_x * nproc_y ;
-	if(nprocs_used > nprocs){
-		printf("you need to give the program more processors, the input says it requires %d processors, and you only gave it %d",nprocs_used, nprocs );
-		exit(2); //We dont have enough processors
-	} else if ( nprocs_used != nprocs){
-		printf("Warning: not all processors are being utilized");
+	int nprocs_used = nprocs_x * nprocs_y ;
+
+	if(rank == master){
+		if(nprocs_used > nprocs){
+			fprintf(stderr, "you need to give the program more processors, the input says it requires %d processors, and you only gave it %d \n",nprocs_used, nprocs );
+			MPI_Abort(MPI_COMM_WORLD, 2); //We dont have enough processors
+		} else if ( nprocs_used != nprocs){
+			fprintf(stderr, "Warning: not all processors are being utilized \n");
+		}
+
 	}
 	
 	//INPUT VARIABLES
@@ -72,6 +77,8 @@ int main (int argc, char** argv){
 	double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
 	double delta_t; //The time step length
 	int number_of_timesteps; //The number of time steps
+	int local_grid_width;
+	int local_grid_height;
 	
 	tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
 
@@ -90,7 +97,7 @@ int main (int argc, char** argv){
 	ifstream birth_rate_file;
 	
 	
-	double broadcast_array[11];
+	double broadcast_array[13];
 	if(rank == master){
 		
 
@@ -122,6 +129,20 @@ int main (int argc, char** argv){
 	
 		config_file.close();
 
+
+
+		if( ( grid_width -2 ) % nprocs_x != 0){
+			fprintf(stderr, "The width %d(without boundries) is not evenly divisible by %d \n", grid_width-2, nprocs_x);
+			MPI_Abort(MPI_COMM_WORLD, 3);
+		}
+
+
+		if( ( grid_height -2 ) % nprocs_y != 0){
+			fprintf(stderr, "The height %d(without boundries) is not evenly divisible by %d \n", grid_height-2, nprocs_y);
+			MPI_Abort(MPI_COMM_WORLD, 3);
+		}
+
+
 		//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
 		double a4 = delta_t * diffusion_tcells / pow(delta_space, 2);
 		double a3 = delta_t * transmission_it;
@@ -149,11 +170,19 @@ int main (int argc, char** argv){
 		broadcast_array[8] = c1;
 		broadcast_array[9] = c2;	
 		broadcast_array[10] = c3;
+
+		
+
+		local_grid_width = ((grid_width - 2)/nprocs_x)+2;
+		local_grid_height = ((grid_height - 2)/nprocs_y)+2;
+
+
+		broadcast_array[11] = local_grid_width;
+		broadcast_array[12] = local_grid_height;
 	}
 	
 
 	MPI::COMM_WORLD.Bcast(( broadcast_array, 11, MPI::DOUBLE, master );
-	//TODO: broadcast 
 
 	a1 = broadcast_array[0];
 	a2 = broadcast_array[1];
@@ -167,6 +196,8 @@ int main (int argc, char** argv){
 	c2 = broadcast_array[9];
 	c3 = broadcast_array[10];
 
+	local_grid_width = broadcast_array[11];
+	local_grid_height = broadcast_array[12];
 	
 	if(rank == master){
 		//Initializing TIV
@@ -205,12 +236,12 @@ int main (int argc, char** argv){
 			}
 		}
 		birth_rate_file.close();
-	}
-	
-	
-	
 
-	//TODO: make parallel
+
+	}
+	//TODO: split matrix
+
+	
 	//Initializing TIV_next
 	
 	// The brunt of the code (TIV_next from TIV)
