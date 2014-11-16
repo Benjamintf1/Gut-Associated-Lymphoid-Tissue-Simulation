@@ -299,6 +299,10 @@ int main (int argc, char** argv){
 	//Initializing TIV_next
 	
 	// The brunt of the code (TIV_next from TIV)
+
+	MPI_Datatype colomn_tiv;
+	MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &colomn_tiv);
+	MPI_Type_commit(&colomn_tiv);
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
 		//TODO: needs to do what it says in green notes
