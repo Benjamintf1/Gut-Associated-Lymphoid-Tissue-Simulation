@@ -297,6 +297,7 @@ int main (int argc, char** argv){
 	
 	MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
 	//Initializing TIV_next
+	tiv* local_TIV_next = new tiv[local_grid_size];
 	
 	// The brunt of the code (TIV_next from TIV)
 
@@ -305,13 +306,23 @@ int main (int argc, char** argv){
 	MPI_Type_commit(&colomn_tiv);
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
+		for(int i = 1; i < local_grid_height-1; ++i){
+			//The Brunt of the Math (calculating TIV_next from TIV)
+                	for(int j = 1; j < local_grid_width-1; ++j){
+                		local_TIV_next[j + i*local_grid_width].t = max(local_TIV[j+i*local_grid_width].t * (a1 - a2 * local_TIV[j+i*local_grid_width].v - a3 * local_TIV[j+i*local_grid_width].i)
+                							+ a4 * (local_TIV[j+(i+1)*local_grid_width].t + local_TIV[j+(i-1)*local_grid_width].t + local_TIV[(j+1)+i*local_grid_width].t + local_TIV[(j-1)+i*local_grid_width].t), 0.0);
+          			local_TIV_next[j + i*local_grid_width].i = max(local_TIV[j+i*local_grid_width].i * (b1 +b2 * local_TIV[j+i*local_grid_width].t) + b3 * local_TIV[j+i*local_grid_width].t *local_TIV[j+i*local_grid_width].v)
+                							+b4 * (local_TIV[j+(i+1)*local_grid_width].i + local_TIV[j+(i-1)*local_grid_width].i + local_TIV[(j+1)+i*local_grid_width].i + local_TIV[(j-1)+i*local_grid_width].i), 0.0);
+                		local_TIV_next[j + i*local_grid_width].v = max(local_TIV[j + i*local_grid_width].v * c1 + c2 * local_TIV[j + i*local_grid_width].i
+                							+c3 * (local_TIV[j+(i+1)*local_grid_width].v + local_TIV[j+(i-1)*local_grid_width].v + local_TIV[(j+1)+i*local_grid_width].v + local_TIV[(j-1)+i*local_grid_width].v), 0.0);
+                	}
+		}
 		//TODO: needs to do what it says in green notes
-			//Wait to Receive step n data from its 2-4 bordering processors.
-				//if n = 0, just wait to make sure the MPI Receive from master went through
 			//Calculate TIV step n+1 (store in TIV_next) from TIV step n (stored in TIV)
 			//Asynch Receive step n+1 data from bordering processors. Store into TIV_next
 			//Asynch Send step n+1 data to bordering processors (this is stored in TIV_next)
 			//Switch pointers of TIV and TIV_next (this shouldn't disrupt send or receives)
+			//Wait to Receive step n+1 data from its 2-4 bordering processors.
 	}
 	
 	//TODO: recombine matrix
