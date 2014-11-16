@@ -155,8 +155,17 @@ int main (int argc, char** argv){
 	MPI::COMM_WORLD.Bcast(( broadcast_array, 11, MPI::DOUBLE, master );
 	//TODO: broadcast 
 
-	
-
+	a1 = broadcast_array[0];
+	a2 = broadcast_array[1];
+	a3 = broadcast_array[2];
+	a4 = broadcast_array[3];
+	b1 = broadcast_array[4];
+	b2 = broadcast_array[5];
+	b3 = broadcast_array[6];
+	b4 = broadcast_array[7];
+	c1 = broadcast_array[8];
+	c2 = broadcast_array[9];
+	c3 = broadcast_array[10];
 
 	
 	if(rank == master){
