@@ -28,6 +28,12 @@ int main (int argc, char** argv){
 	//START OF PARALLEL
 	MPI::Init(argc, argv);
 
+	MPI_Datatype mpi_tiv;
+
+
+	MPI_Type_contiguous(3, MPI::DOUBLE, &mpi_tiv);  //we need to create a mpi version of this data type so we can send and recieve it
+	MPI_Type_commit(&mpi_tiv);
+
 	int rank = MPI::COMM_WORLD.Get_rank();
 	int nprocs = MPI::COMM_WORLD.Get_size();
 	
