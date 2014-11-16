@@ -90,7 +90,7 @@ int main (int argc, char** argv){
 	ifstream birth_rate_file;
 	
 	
-	
+	double broadcast_array[11];
 	if(rank == master){
 		
 
@@ -136,9 +136,28 @@ int main (int argc, char** argv){
 		double c3 = delta_t * diffusion_virus / pow(delta_space, 2);
 		double c2 = delta_t * burst_rate * death_infected; 
 		double c1 = 1 - 4 * c3 - delta_t * death_virus; 
-	}
+		
 
+		broadcast_array[0] = a1;
+		broadcast_array[1] = a2;
+		broadcast_array[2] = a3;
+		broadcast_array[3] = a4;
+		broadcast_array[4] = b1;
+		broadcast_array[5] = b2;
+		broadcast_array[6] = b3;
+		broadcast_array[7] = b4;			
+		broadcast_array[8] = c1;
+		broadcast_array[9] = c2;	
+		broadcast_array[10] = c3;
+	}
+	
+
+	MPI::COMM_WORLD.Bcast(( broadcast_array, 11, MPI::DOUBLE, master );
 	//TODO: broadcast 
+
+	
+
+
 	
 	if(rank == master){
 		//Initializing TIV
