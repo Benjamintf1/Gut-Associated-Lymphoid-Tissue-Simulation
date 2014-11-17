@@ -334,8 +334,8 @@ int main (int argc, char** argv){
 		up_proc = rank + nprocs_x;
 	} 
 	//Stores our requests so we can wait appropriately
-	MPI_request sends[4];
-	MPI_request receives[4];
+	MPI_Request sends[4];
+	MPI_Request receives[4];
 	int neighbors = 0;
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
