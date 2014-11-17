@@ -333,6 +333,10 @@ int main (int argc, char** argv){
 		up = true;
 		up_proc = rank + nprocs_x;
 	} 
+	//Stores our requests so we can wait appropriately
+	MPI_request* sends[4];
+	MPI_request* receives[4];
+	int neighbors = 0;
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
 		for(int i = 1; i < local_grid_height-1; ++i){
@@ -353,12 +357,38 @@ int main (int argc, char** argv){
 									+local_TIV[(j+1)+i*local_grid_width].v + local_TIV[(j-1)+i*local_grid_width].v), 0.0);
                 	}
 		}
-		//TODO: needs to do what it says in green notes
-			//Calculate TIV step n+1 (store in TIV_next) from TIV step n (stored in TIV)
-			//Asynch Receive step n+1 data from bordering processors. Store into TIV_next
-			//Asynch Send step n+1 data to bordering processors (this is stored in TIV_next)
-			//Switch pointers of TIV and TIV_next (this shouldn't disrupt send or receives)
-			//Wait to Receive step n+1 data from its 2-4 bordering processors.
+		//Wait for (last time's [n]) Sends:
+		if(n > 0) { //Not for the first step (no previous steps)
+			MPI_Waitall(neighbors, sends, MPI_STATUSES_IGNORE);
+		}
+		//Asynchronous Receives and Sends:
+		neighbors = 0;
+		if(up){
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[1], 1, row_tiv, up_proc, 10); 
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1+local_grid_width], 1, row_tiv, up_proc, 10); 
+			++neighbors;
+		}
+		if(down){
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[1 + (local_grid_height-1)*local_grid_width], 1, row_tiv, down_proc, 10); 
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1 + (local_grid_height-2)*local_grid_width], 1, row_tiv, down_proc, 10); 	
+			++neighbors;
+		}
+		if(left){
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[local_grid_width], 1, col_tiv, left_proc, 10); 
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1+local_grid_width], 1, col_tiv, left_proc, 10); 
+			++neighbors;
+		}
+		if(right){
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[2*local_grid_width - 1], 1, col_tiv, right_proc, 10); 
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[2*local_grid_width-2], 1, col_tiv, right_proc, 10); 
+			++neighbors;
+		}
+		//Swapping TIV and TIV_next pointers
+		tiv* temp = local_TIV;
+		local_TIV = local_TIV_next;
+		local_TIV_next = temp;
+		//Wait for (THIS time's [n+1]) Receives:
+		MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
 	}
 	
 	//TODO: recombine matrix
