@@ -392,8 +392,36 @@ int main (int argc, char** argv){
 	}
 	
 	//TODO: recombine matrix
+	MPI::COMM_WORLD.Send(local_TIV, local_grid_size, mpi_tiv, master, 23);
 	
 	if(rank == master){
+		//Recombining the Matrix
+		MPI_Request finished[nprocs_used];
+		for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
+			finished[k] = MPI::COMM_WORLD.Irecv(TIV_buffers[k], local_grid_size, mpi_tiv, k, 23);
+		}
+		MPI_Waitall(nprocs_used, finished, MPI_STATUSES_IGNORE);
+		
+		//Reallocating the TIV matrix:
+		TIV = new tiv*[grid_height];
+		for(int i = 0; i < grid_height; ++i ){
+			TIV[i] = new tiv[grid_width];
+		}
+		//Unpacking from buffer into the ("logically" arranged) TIV matrix
+		int proc_x, proc_y;
+		for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
+			proc_x = k % nprocs_x;
+			proc_y = k / nprocs_x;
+			
+			int n = 0; //location in buffer
+			
+			for(int i = (proc_y * local_grid_height) - proc_y; i <= (proc_y + 1) * local_grid_height - proc_y; ++i) {
+				for(int j = (proc_x * local_grid_width) - proc_x; j <= (proc_x + 1) * local_grid_width - proc_x; ++j) {
+					TIV[i][j] = TIV_buffers[k][n];
+					++n;
+				}
+			}
+		}
 		//WRITING the TIV matrix elements into "result" files t,i, and v.
 		ofstream result_t_file(result_t_filename.c_str(), ios::out |ios::binary);
 		ofstream result_i_file(result_i_filename.c_str(), ios::out |ios::binary);
