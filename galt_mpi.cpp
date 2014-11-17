@@ -304,6 +304,32 @@ int main (int argc, char** argv){
 	MPI_Datatype colomn_tiv;
 	MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &colomn_tiv);
 	MPI_Type_commit(&colomn_tiv);
+
+	
+	bool up, down, left, right;
+	int up_proc, down_proc, left_proc, right_proc;
+	up = down = left = right = false;
+
+	int proc_x = rank % nprocs_x;
+	int proc_y = rank / nprocs_x;
+
+	if(proc_x > 0){
+		left = true;
+		left_proc = rank - 1;
+	} 
+	if(proc_x < nprocs_x){
+		right = true;
+		right_proc = rank + 1;
+	} 
+
+	if(proc_y > 0){
+		down = true;
+		down_proc = rank - nprocs_x;
+	} 
+	if(proc_y < nprocs_y){
+		up = true;
+		up_proc = rank + nprocs_x;
+	} 
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
 		for(int i = 1; i < local_grid_height-1; ++i){
