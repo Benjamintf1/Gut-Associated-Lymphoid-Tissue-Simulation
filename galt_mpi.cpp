@@ -305,6 +305,9 @@ int main (int argc, char** argv){
 	MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &colomn_tiv);
 	MPI_Type_commit(&colomn_tiv);
 
+	MPI_Datatype row_tiv;
+	MPI_Type_vector(local_grid_width-2, 1, 1, mpi_tiv, &row_tiv);
+	MPI_Type_commit(&row_tiv);
 	
 	bool up, down, left, right;
 	int up_proc, down_proc, left_proc, right_proc;
