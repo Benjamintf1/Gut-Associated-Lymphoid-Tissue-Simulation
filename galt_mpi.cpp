@@ -309,14 +309,16 @@ int main (int argc, char** argv){
 		for(int i = 1; i < local_grid_height-1; ++i){
 			//The Brunt of the Math (calculating TIV_next from TIV)
                 	for(int j = 1; j < local_grid_width-1; ++j){
-                		local_TIV_next[j + i*local_grid_width].t = max(local_TIV[j+i*local_grid_width].t * 
-									(a1 - a2 * local_TIV[j+i*local_grid_width].v - a3 * local_TIV[j+i*local_grid_width].i)
-                							+ a4 * (local_TIV[j+(i+1)*local_grid_width].t + local_TIV[j+(i-1)*local_grid_width].t + local_TIV[(j+1)	
-									+ i*local_grid_width].t + local_TIV[(j-1)+i*local_grid_width].t), 0.0);
-          			local_TIV_next[j + i*local_grid_width].i = max(local_TIV[j+i*local_grid_width].i * 
-									(b1 +b2 * local_TIV[j+i*local_grid_width].t) + b3 * local_TIV[j+i*local_grid_width].t *local_TIV[j+i*local_grid_width].v
+                		local_TIV_next[j + i*local_grid_width].t = max(local_TIV[j+i*local_grid_width].t * (a1 - a2 * local_TIV[j+i*local_grid_width].v 
+									- a3 * local_TIV[j+i*local_grid_width].i) + local_birth[j+i*local_grid_width]
+									+ a4 * (local_TIV[j+(i+1)*local_grid_width].t + local_TIV[j+(i-1)*local_grid_width].t
+									+ local_TIV[(j+1)+ i*local_grid_width].t + local_TIV[(j-1)+i*local_grid_width].t), 0.0);
+
+          			local_TIV_next[j + i*local_grid_width].i = max(local_TIV[j+i*local_grid_width].i * (b1 +b2 * local_TIV[j+i*local_grid_width].t) 
+									+ b3 * local_TIV[j+i*local_grid_width].t *local_TIV[j+i*local_grid_width].v
                 							+ b4 * (local_TIV[j+(i+1)*local_grid_width].i + local_TIV[j+(i-1)*local_grid_width].i 
 									+ local_TIV[(j+1)+i*local_grid_width].i + local_TIV[(j-1)+i*local_grid_width].i), 0.0);
+
                 		local_TIV_next[j + i*local_grid_width].v = max(local_TIV[j + i*local_grid_width].v * c1 + c2 * local_TIV[j + i*local_grid_width].i
                 							+c3 * (local_TIV[j+(i+1)*local_grid_width].v + local_TIV[j+(i-1)*local_grid_width].v  
 									+local_TIV[(j+1)+i*local_grid_width].v + local_TIV[(j-1)+i*local_grid_width].v), 0.0);
