@@ -102,6 +102,9 @@ int main (int argc, char** argv){
 	//derived variables
 	double a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3;
 	
+	//Buffers
+	double** birth_rate_buffers;
+	tiv** TIV_buffers;
 	
 	double broadcast_array[13];
 	if(rank == master){
@@ -249,11 +252,11 @@ int main (int argc, char** argv){
 		birth_rate_file.close();
 
 		//Setting up Buffers to split the matrices
-		tiv** TIV_buffers = new tiv* [nprocs_used];
+		TIV_buffers = new tiv* [nprocs_used];
 		for(int i = 0; i < nprocs_used; ++i ){
 			TIV_buffers[i] = new tiv[local_grid_size];
 		}
-		double** birth_rate_buffers = new double* [nprocs_used];
+		birth_rate_buffers = new double* [nprocs_used];
 		for(int i = 0; i < nprocs_used; ++i ){
 			birth_rate_buffers[i] = new double[local_grid_size];
 		}
@@ -401,6 +404,12 @@ int main (int argc, char** argv){
 			finished[k] = MPI::COMM_WORLD.Irecv(TIV_buffers[k], local_grid_size, mpi_tiv, k, 23);
 		}
 		MPI_Waitall(nprocs_used, finished, MPI_STATUSES_IGNORE);
+		
+		//Finally deallocating birthrate buffers
+		for(int p = 0; p < nprocs_used; ++p ){
+			delete[] birth_rate_buffers[p];
+		}
+		delete[] birth_rate_buffers;
 		
 		//Reallocating the TIV matrix:
 		TIV = new tiv*[grid_height];
