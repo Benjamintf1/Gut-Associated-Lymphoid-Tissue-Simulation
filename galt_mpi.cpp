@@ -301,9 +301,9 @@ int main (int argc, char** argv){
 	
 	// The brunt of the code (TIV_next from TIV)
 
-	MPI_Datatype colomn_tiv;
-	MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &colomn_tiv);
-	MPI_Type_commit(&colomn_tiv);
+	MPI_Datatype col_tiv;
+	MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &col_tiv);
+	MPI_Type_commit(&col_tiv);
 
 	MPI_Datatype row_tiv;
 	MPI_Type_vector(local_grid_width-2, 1, 1, mpi_tiv, &row_tiv);
@@ -334,8 +334,8 @@ int main (int argc, char** argv){
 		up_proc = rank + nprocs_x;
 	} 
 	//Stores our requests so we can wait appropriately
-	MPI_request* sends[4];
-	MPI_request* receives[4];
+	MPI_request sends[4];
+	MPI_request receives[4];
 	int neighbors = 0;
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 		
