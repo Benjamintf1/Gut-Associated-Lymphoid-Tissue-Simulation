@@ -367,23 +367,24 @@ int main (int argc, char** argv){
 		//Asynchronous Receives and Sends:
 		neighbors = 0;
 		if(up){
-			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[1], 1, row_tiv, up_proc, 10); 
+			
 			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1+local_grid_width], 1, row_tiv, up_proc, 10); 
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[1], 1, row_tiv, up_proc, 10); 
 			++neighbors;
 		}
 		if(down){
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1 + (local_grid_height-2)*local_grid_width], 1, row_tiv, down_proc, 10); 
 			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[1 + (local_grid_height-1)*local_grid_width], 1, row_tiv, down_proc, 10); 
-			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1 + (local_grid_height-2)*local_grid_width], 1, row_tiv, down_proc, 10); 	
 			++neighbors;
 		}
 		if(left){
-			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[local_grid_width], 1, col_tiv, left_proc, 10); 
 			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1+local_grid_width], 1, col_tiv, left_proc, 10); 
+			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[local_grid_width], 1, col_tiv, left_proc, 10); 
 			++neighbors;
 		}
 		if(right){
+			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[2*local_grid_width-2], 1, col_tiv, right_proc, 10);
 			receives[neighbors] = MPI::COMM_WORLD.Irecv(&local_TIV_next[2*local_grid_width - 1], 1, col_tiv, right_proc, 10); 
-			sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[2*local_grid_width-2], 1, col_tiv, right_proc, 10); 
 			++neighbors;
 		}
 		//Swapping TIV and TIV_next pointers
