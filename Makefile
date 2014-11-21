@@ -1,4 +1,7 @@
-all: sim_s gen_files_simple
+all: sim_s gen_files_simple sim_mpi
+
+sim_mpi: galt_mpi.cpp
+	mpiCC galt_mpi.cpp -o sim_mpi
 
 sim_s: galt_serial.cpp
 	g++ galt_serial.cpp -o sim_s
