@@ -303,9 +303,6 @@ int main (int argc, char** argv){
 		
 		
 		MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
-		if(rank == master){
-			MPI_Waitall(nprocs_used * 2, master_sends, MPI_STATUSES_IGNORE);
-		}
 		
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
@@ -347,7 +344,7 @@ int main (int argc, char** argv){
 		
 
 	
-		
+		/*
 		//Stores our requests so we can wait appropriately
 		MPI_Request sends[4];
 		MPI_Request receives[4];
@@ -408,7 +405,7 @@ int main (int argc, char** argv){
 			//Wait for (THIS time's [n+1]) Receives:
 			MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
 		}
-		
+		*/
 		/*
 		//TODO: recombine matrix
 		MPI::COMM_WORLD.Send(local_TIV, local_grid_size, mpi_tiv, master, 23);
