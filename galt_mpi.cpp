@@ -273,8 +273,8 @@ int main (int argc, char** argv){
 			
 				int n = 0; //location in buffer
 			
-				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
-					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+				for(int i = proc_y * (local_grid_height-2) ;       i < ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
+					for(int j = proc_x * (local_grid_width-2) ;     j < ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
 						TIV_buffers[k][n] = TIV[i][j];
 						birth_rate_buffers[k][n] = tcell_birth_rate[i][j];
 						++n;
@@ -307,8 +307,7 @@ int main (int argc, char** argv){
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
 	
-		// The brunt of the code (TIV_next from TIV)
-
+		//Useful types for passing data:
 		MPI_Datatype col_tiv;
 		MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &col_tiv);
 		MPI_Type_commit(&col_tiv);
@@ -317,6 +316,7 @@ int main (int argc, char** argv){
 		MPI_Type_vector(local_grid_width-2, 1, 1, mpi_tiv, &row_tiv);
 		MPI_Type_commit(&row_tiv);
 	
+		//Different behavior if a processor is on the boundary:
 		bool up, down, left, right;
 		int up_proc, down_proc, left_proc, right_proc;
 		up = down = left = right = false;
@@ -342,7 +342,14 @@ int main (int argc, char** argv){
 			down_proc = rank + nprocs_x;
 		} 
 		
-
+		for(int i = 0; i < local_grid_height; ++i) {
+			TIV_next[i * local_grid_width] = TIV[i];
+			TIV_next[(i+1) * local_grid_width - 1] = TIV[(i+1) * local_grid_width - 1];
+		}
+		for(int j = 0; j < local_grid_width; ++j){
+			TIV_next[j] = TIV[j];
+			TIV_next[(local_grid_height-1) * local_grid_width + j] = TIV[(local_grid_height-1) * local_grid_width + j];	
+		}
 	
 		//Stores our requests so we can wait appropriately
 		MPI_Request sends[4];
