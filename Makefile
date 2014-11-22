@@ -1,7 +1,7 @@
 all: sim_serial gen_files_simple sim_mpi sim_hybrid
 
-sim_mpi: src/galt_mpi.cpp
-	mpiCC src/galt_mpi.cpp -o sim_mpi
+sim_mpi: src/galt_hybrid.cpp
+	mpiCC src/galt_hybrid.cpp -o sim_mpi
 
 sim_hybrid: src/galt_hybrid.cpp
 	mpiCC -openmp src/galt_hybrid.cpp -o sim_hybrid
