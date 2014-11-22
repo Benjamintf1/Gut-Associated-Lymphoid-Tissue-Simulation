@@ -449,8 +449,12 @@ int main (int argc, char** argv){
 			
 				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
 					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+						//boundry conditions suck. This should only use the edges if the edge is on the absolute edge
 						if(    j == proc_x * (local_grid_width-2) || j == ((proc_x + 1) * (local_grid_width-2)) +1 
 							|| i == proc_y * (local_grid_height-2) || i == ((proc_y + 1) * (local_grid_height -2)) + 1){
+							if( i == 0 || i==grid_height-1 || j == 0 || j == grid_width -1){
+								TIV[i][j] = TIV_buffers[k][n];
+							}
 							++n;
 							continue;
 						}
