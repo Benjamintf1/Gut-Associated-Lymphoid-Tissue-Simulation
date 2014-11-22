@@ -108,7 +108,7 @@ int main (int argc, char** argv){
 		double** birth_rate_buffers;
 		tiv** TIV_buffers;
 	
-		double broadcast_array[13];
+		double broadcast_array[14];
 		if(rank == master){
 		
 
@@ -190,10 +190,11 @@ int main (int argc, char** argv){
 
 			broadcast_array[11] = local_grid_width;
 			broadcast_array[12] = local_grid_height;
+			broadcast_array[13] = number_of_timesteps;
 		}
 	
 
-		MPI::COMM_WORLD.Bcast( broadcast_array, 13, MPI::DOUBLE, master );
+		MPI::COMM_WORLD.Bcast( broadcast_array, 14, MPI::DOUBLE, master );
 
 		a1 = broadcast_array[0];
 		a2 = broadcast_array[1];
@@ -209,7 +210,7 @@ int main (int argc, char** argv){
 
 		local_grid_width = broadcast_array[11];
 		local_grid_height = broadcast_array[12];
-	
+		number_of_timesteps = broadcast_array[13];
 		int local_grid_size = local_grid_height * local_grid_width;
 	
 	
@@ -303,7 +304,6 @@ int main (int argc, char** argv){
 		
 		
 		MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
-		
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
 	
@@ -344,13 +344,13 @@ int main (int argc, char** argv){
 		
 
 	
-		/*
 		//Stores our requests so we can wait appropriately
 		MPI_Request sends[4];
 		MPI_Request receives[4];
 		int neighbors = 0;
+		printf("i'm proc %d and i'm ready to simulate\n", rank);
 		for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
-		
+			printf("i'm proc %d and i'm ready for step %d\n", rank, n);
 			for(int i = 1; i < local_grid_height-1; ++i){
 				//The Brunt of the Math (calculating TIV_next from TIV)
 		        	for(int j = 1; j < local_grid_width-1; ++j){
@@ -369,13 +369,14 @@ int main (int argc, char** argv){
 										+local_TIV[(j+1)+i*local_grid_width].v + local_TIV[(j-1)+i*local_grid_width].v), 0.0);
 		        	}
 			}
+
 			//Wait for (last time's [n]) Sends:
 			if(n > 0) { //Not for the first step (no previous steps)
 				MPI_Waitall(neighbors, sends, MPI_STATUSES_IGNORE);
 			}
 			//Asynchronous Receives and Sends:
 			neighbors = 0;
-		
+
 			if(up){
 			
 				sends[neighbors] = MPI::COMM_WORLD.Isend(&local_TIV_next[1+local_grid_width], 1, row_tiv, up_proc, 10); 
@@ -403,10 +404,12 @@ int main (int argc, char** argv){
 			local_TIV = local_TIV_next;
 			local_TIV_next = temp;
 			//Wait for (THIS time's [n+1]) Receives:
+
+
 			MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
 		}
-		*/
-		/*
+
+		printf("hi i'm done %d\n", rank);
 		//TODO: recombine matrix
 		MPI::COMM_WORLD.Send(local_TIV, local_grid_size, mpi_tiv, master, 23);
 	
@@ -460,7 +463,7 @@ int main (int argc, char** argv){
 			result_v_file.close();
 		}
 
-		*/
+		
 	}
 
 	MPI::Finalize();
