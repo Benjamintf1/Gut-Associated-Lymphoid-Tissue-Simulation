@@ -150,7 +150,14 @@ int main (int argc, char** argv){
 	for(int i = 0; i < grid_height; ++i ){
 		TIV_next[i] = new tiv[grid_width];
 	}
-	
+	for(int i = 0; i < grid_height; ++i){
+		TIV_next[i][grid_width] = TIV_next[i][grid_width];
+		TIV_next[i][0] = TIV_next[i][0];
+	}
+	for(int j = 0; j < grid_height; ++j){
+		TIV_next[grid_height][j] = TIV_next[grid_height][j];
+		TIV_next[0][j] = TIV_next[0][j];
+	}
 	// The brunt of the code (TIV_next from TIV)
 	for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 

@@ -273,8 +273,8 @@ int main (int argc, char** argv){
 			
 				int n = 0; //location in buffer
 			
-				for(int i = proc_y * (local_grid_height-2) ;       i < ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
-					for(int j = proc_x * (local_grid_width-2) ;     j < ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
+					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
 						TIV_buffers[k][n] = TIV[i][j];
 						birth_rate_buffers[k][n] = tcell_birth_rate[i][j];
 						++n;
