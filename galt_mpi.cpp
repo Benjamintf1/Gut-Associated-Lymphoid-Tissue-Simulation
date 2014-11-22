@@ -215,7 +215,7 @@ int main (int argc, char** argv){
 	
 	
 
-		MPI_Request* master_sends;
+
 		if(rank == master){
 			
 			//Initializing TIV
@@ -264,7 +264,7 @@ int main (int argc, char** argv){
 			for(int i = 0; i < nprocs_used; ++i ){
 				birth_rate_buffers[i] = new double[local_grid_size];
 			}
-			master_sends = new MPI_Request[nprocs_used * 2];
+
 			//Splitting the Matrices
 			int proc_x, proc_y; //The processor's x and y coordinates
 			for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
@@ -280,8 +280,8 @@ int main (int argc, char** argv){
 						++n;
 					}
 				}
-				master_sends[k]=MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
-				master_sends[k+nprocs_used]=MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
+				MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
+				MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
 			}
 		
 			//Deallocating the no longer needed TIV and t_cell_birth_rate matrices:
