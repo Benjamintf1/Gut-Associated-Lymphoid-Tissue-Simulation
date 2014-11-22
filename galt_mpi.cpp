@@ -449,6 +449,12 @@ int main (int argc, char** argv){
 			
 				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
 					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+						if(    j == proc_x * (local_grid_width-2) || j == ((proc_x + 1) * (local_grid_width-2)) +1 
+							|| i == proc_y * (local_grid_height-2) || i == ((proc_y + 1) * (local_grid_height -2)) + 1){
+							++n;
+							continue;
+						}
+				
 						TIV[i][j] = TIV_buffers[k][n];
 						++n;
 					}
