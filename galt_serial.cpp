@@ -151,11 +151,11 @@ int main (int argc, char** argv){
 		TIV_next[i] = new tiv[grid_width];
 	}
 	for(int i = 0; i < grid_height; ++i){
-		TIV_next[i][grid_width] = TIV_next[i][grid_width];
+		TIV_next[i][grid_width-1] = TIV_next[i][grid_width-1];
 		TIV_next[i][0] = TIV_next[i][0];
 	}
 	for(int j = 0; j < grid_height; ++j){
-		TIV_next[grid_height][j] = TIV_next[grid_height][j];
+		TIV_next[grid_height-1][j] = TIV_next[grid_height-1][j];
 		TIV_next[0][j] = TIV_next[0][j];
 	}
 	// The brunt of the code (TIV_next from TIV)
