@@ -193,7 +193,7 @@ int main (int argc, char** argv){
 		}
 	
 
-		MPI::COMM_WORLD.Bcast( broadcast_array, 11, MPI::DOUBLE, master );
+		MPI::COMM_WORLD.Bcast( broadcast_array, 13, MPI::DOUBLE, master );
 
 		a1 = broadcast_array[0];
 		a2 = broadcast_array[1];
@@ -214,8 +214,9 @@ int main (int argc, char** argv){
 	
 	
 
-	
+		MPI_Request* master_sends;
 		if(rank == master){
+			
 			//Initializing TIV
 			TIV = new tiv*[grid_height];
 			for(int i = 0; i < grid_height; ++i ){
@@ -262,7 +263,7 @@ int main (int argc, char** argv){
 			for(int i = 0; i < nprocs_used; ++i ){
 				birth_rate_buffers[i] = new double[local_grid_size];
 			}
-		
+			master_sends = new MPI_Request[nprocs_used * 2];
 			//Splitting the Matrices
 			int proc_x, proc_y; //The processor's x and y coordinates
 			for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
@@ -278,9 +279,8 @@ int main (int argc, char** argv){
 						++n;
 					}
 				}
-				printf("i'm sending to  %d\n", k);
-				MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
-				MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
+				master_sends[k]=MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
+				master_sends[k+nprocs_used]=MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
 			}
 		
 			//Deallocating the no longer needed TIV and t_cell_birth_rate matrices:
@@ -300,10 +300,13 @@ int main (int argc, char** argv){
 		MPI_Request master_recieve[2];
 		master_recieve[0] = MPI::COMM_WORLD.Irecv(local_TIV, local_grid_size, mpi_tiv, master, 1);
 		master_recieve[1] = MPI::COMM_WORLD.Irecv(local_birth, local_grid_size, MPI::DOUBLE, master, 2);
-	
-		printf("i'm proc %d\n", rank);
+		
+		
 		MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
-		printf("i'm proc %d\n", rank);
+		if(rank == master){
+			MPI_Waitall(nprocs_used * 2, master_sends, MPI_STATUSES_IGNORE);
+		}
+		
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
 	
@@ -326,29 +329,25 @@ int main (int argc, char** argv){
 
 		if(proc_x > 0){
 			left = true;
-			printf("i'm proc %d, and i have a proc to my left\n", rank);
 			left_proc = rank - 1;
 		} 
 		if(proc_x < nprocs_x - 1){
 			right = true;
-			printf("i'm proc %d, and i have a proc to my right\n", rank);
 			right_proc = rank + 1;
 		} 
 
 		if(proc_y > 0){
-			down = true;
-			printf("i'm proc %d, and i have a proc to my down\n", rank);
-			down_proc = rank - nprocs_x;
+			up = true;
+			up_proc = rank - nprocs_x;
 		} 
 		if(proc_y < nprocs_y -1){
-			up = true;
-			printf("i'm proc %d, and i have a proc to my up\n", rank);
-			up_proc = rank + nprocs_x;
+			down = true;
+			down_proc = rank + nprocs_x;
 		} 
 		
 
 	
-	
+		
 		//Stores our requests so we can wait appropriately
 		MPI_Request sends[4];
 		MPI_Request receives[4];
@@ -409,6 +408,7 @@ int main (int argc, char** argv){
 			//Wait for (THIS time's [n+1]) Receives:
 			MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
 		}
+		
 		/*
 		//TODO: recombine matrix
 		MPI::COMM_WORLD.Send(local_TIV, local_grid_size, mpi_tiv, master, 23);
