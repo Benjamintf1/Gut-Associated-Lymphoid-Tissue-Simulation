@@ -411,8 +411,8 @@ int main (int argc, char** argv){
 
 		printf("hi i'm done %d\n", rank);
 		//TODO: recombine matrix
-		MPI::COMM_WORLD.Send(local_TIV, local_grid_size, mpi_tiv, master, 23);
-	
+		MPI::COMM_WORLD.Isend(local_TIV, local_grid_size, mpi_tiv, master, 23);
+		printf("hi i'm done sending to master %d\n", rank);
 		if(rank == master){
 			//Recombining the Matrix
 			MPI_Request finished[nprocs_used];
