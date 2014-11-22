@@ -28,7 +28,8 @@ struct tiv{
 int main (int argc, char** argv){
 	//START OF PARALLEL
 	MPI::Init(argc, argv);
-	
+	double start_time;
+	double end_time;
 	int rank = MPI::COMM_WORLD.Get_rank();
 	int nprocs = MPI::COMM_WORLD.Get_size();
 
@@ -109,8 +110,12 @@ int main (int argc, char** argv){
 		tiv** TIV_buffers;
 	
 		double broadcast_array[14];
-		if(rank == master){
+
+		double after_read;
+		double before_write;
 		
+		if(rank == master){
+			start_time = MPI_Wtime();
 
 
 
@@ -191,6 +196,8 @@ int main (int argc, char** argv){
 			broadcast_array[11] = local_grid_width;
 			broadcast_array[12] = local_grid_height;
 			broadcast_array[13] = number_of_timesteps;
+
+			
 		}
 	
 
@@ -254,7 +261,12 @@ int main (int argc, char** argv){
 				}
 			}
 			birth_rate_file.close();
-		
+
+			//START OF TIMER, we are going to ignore reading the files. 
+			after_read = MPI_Wtime();
+
+
+
 			//Setting up Buffers to split the matrices
 			TIV_buffers = new tiv* [nprocs_used];
 			for(int i = 0; i < nprocs_used; ++i ){
@@ -428,6 +440,8 @@ int main (int argc, char** argv){
 			}
 			MPI_Waitall(nprocs_used, finished, MPI_STATUSES_IGNORE);
 		
+
+			
 			//Finally deallocating birthrate buffers
 			for(int p = 0; p < nprocs_used; ++p ){
 				delete[] birth_rate_buffers[p];
@@ -439,6 +453,9 @@ int main (int argc, char** argv){
 			for(int i = 0; i < grid_height; ++i ){
 				TIV[i] = new tiv[grid_width];
 			}
+			
+		
+
 			//Unpacking from buffer into the ("logically" arranged) TIV matrix
 			int proc_x, proc_y;
 			for(int k = 0; k < nprocs_used; ++k) { //for every processor (that we want to use)
@@ -464,6 +481,14 @@ int main (int argc, char** argv){
 					}
 				}
 			}
+
+
+			//Ignore the file stuff
+
+			before_write = MPI_Wtime();
+
+			printf("The runtime ignoring read/write from large files is %f \n", before_write - after_read);
+
 			//WRITING the TIV matrix elements into "result" files t,i, and v.
 			ofstream result_t_file(result_t_filename.c_str(), ios::out |ios::binary);
 			ofstream result_i_file(result_i_filename.c_str(), ios::out |ios::binary);
@@ -478,8 +503,13 @@ int main (int argc, char** argv){
 			result_t_file.close();
 			result_i_file.close();
 			result_v_file.close();
+
+			end_time = MPI_Wtime();
+
+			printf("The runtime is %f \n", end_time - start_time);
 		}
 
+		
 		
 	}
 
