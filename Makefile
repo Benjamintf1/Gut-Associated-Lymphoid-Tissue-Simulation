@@ -15,6 +15,12 @@ obj/generator1.o: src/generator1.cpp
 gen_files_simple: obj/generator1.o src/generate_tivb_files.cpp
 	g++ src/generate_tivb_files.cpp obj/generator1.o -o gen_files_simple
 
+clean:
+	rm obj/generator1.o
+	rm sim_serial
+	rm sim_hybrid
+	rm sim_mpi
+
 
 
 
