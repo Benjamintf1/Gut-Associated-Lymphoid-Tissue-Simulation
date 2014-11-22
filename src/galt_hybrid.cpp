@@ -273,8 +273,8 @@ int main (int argc, char** argv){
 			
 				int n = 0; //location in buffer
 			
-				for(int i = proc_y * (local_grid_height-2) ;       i < ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
-					for(int j = proc_x * (local_grid_width-2) ;     j < ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
+					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
 						TIV_buffers[k][n] = TIV[i][j];
 						birth_rate_buffers[k][n] = tcell_birth_rate[i][j];
 						++n;
@@ -307,8 +307,7 @@ int main (int argc, char** argv){
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
 	
-		// The brunt of the code (TIV_next from TIV)
-
+		//Useful types for passing data:
 		MPI_Datatype col_tiv;
 		MPI_Type_vector(local_grid_height-2, 1, local_grid_width, mpi_tiv, &col_tiv);
 		MPI_Type_commit(&col_tiv);
@@ -317,6 +316,7 @@ int main (int argc, char** argv){
 		MPI_Type_vector(local_grid_width-2, 1, 1, mpi_tiv, &row_tiv);
 		MPI_Type_commit(&row_tiv);
 	
+		//Different behavior if a processor is on the boundary:
 		bool up, down, left, right;
 		int up_proc, down_proc, left_proc, right_proc;
 		up = down = left = right = false;
@@ -342,13 +342,20 @@ int main (int argc, char** argv){
 			down_proc = rank + nprocs_x;
 		} 
 		
-
+		for(int i = 0; i < local_grid_height; ++i) {
+			local_TIV_next[i * local_grid_width] = local_TIV[i];
+			local_TIV_next[(i+1) * local_grid_width - 1] = local_TIV[(i+1) * local_grid_width - 1];
+		}
+		for(int j = 0; j < local_grid_width; ++j){
+			local_TIV_next[j] = local_TIV[j];
+			local_TIV_next[(local_grid_height-1) * local_grid_width + j] = local_TIV[(local_grid_height-1) * local_grid_width + j];	
+		}
 	
 		//Stores our requests so we can wait appropriately
 		MPI_Request sends[4];
 		MPI_Request receives[4];
 		int neighbors = 0;
-		
+
 		for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
 			#pragma omp parallel for
 			for(int i = 1; i < local_grid_height-1; ++i){
@@ -440,8 +447,18 @@ int main (int argc, char** argv){
 			
 				int n = 0; //location in buffer
 			
-				for(int i = proc_y * (local_grid_height-2) ;       i < ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
-					for(int j = proc_x * (local_grid_width-2) ;     j < ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+				for(int i = proc_y * (local_grid_height-2) ;       i <= ((proc_y + 1) * (local_grid_height -2)) + 1;         ++i) {
+					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
+						//boundry conditions suck. This should only use the edges if the edge is on the absolute edge
+						if(    j == proc_x * (local_grid_width-2) || j == ((proc_x + 1) * (local_grid_width-2)) +1 
+							|| i == proc_y * (local_grid_height-2) || i == ((proc_y + 1) * (local_grid_height -2)) + 1){
+							if( i == 0 || i==grid_height-1 || j == 0 || j == grid_width -1){
+								TIV[i][j] = TIV_buffers[k][n];
+							}
+							++n;
+							continue;
+						}
+				
 						TIV[i][j] = TIV_buffers[k][n];
 						++n;
 					}

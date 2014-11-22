@@ -20,3 +20,5 @@ double generate_birth(int x, int y, int width, int height, double delta_space ){
 
 	return 20;
 }
+
+
