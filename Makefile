@@ -1,4 +1,4 @@
-all: sim_serial gen_files_simple sim_mpi sim_hybrid
+all: make_dirs sim_serial gen_files_simple sim_mpi sim_hybrid
 
 sim_mpi: src/galt_mpi.cpp
 	mpiCC src/galt_mpi.cpp -o sim_mpi
