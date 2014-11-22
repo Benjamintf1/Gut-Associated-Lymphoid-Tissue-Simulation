@@ -343,12 +343,12 @@ int main (int argc, char** argv){
 		} 
 		
 		for(int i = 0; i < local_grid_height; ++i) {
-			TIV_next[i * local_grid_width] = TIV[i];
-			TIV_next[(i+1) * local_grid_width - 1] = TIV[(i+1) * local_grid_width - 1];
+			local_TIV_next[i * local_grid_width] = local_TIV[i];
+			local_TIV_next[(i+1) * local_grid_width - 1] = local_TIV[(i+1) * local_grid_width - 1];
 		}
 		for(int j = 0; j < local_grid_width; ++j){
-			TIV_next[j] = TIV[j];
-			TIV_next[(local_grid_height-1) * local_grid_width + j] = TIV[(local_grid_height-1) * local_grid_width + j];	
+			local_TIV_next[j] = local_TIV[j];
+			local_TIV_next[(local_grid_height-1) * local_grid_width + j] = local_TIV[(local_grid_height-1) * local_grid_width + j];	
 		}
 	
 		//Stores our requests so we can wait appropriately
