@@ -3,7 +3,6 @@
 	This is the pure MPI version of the code to generate the T-Cell, Infected and Viroid population grid over a number of timesteps.
 	
 */
-//TODO: make parallel
 #define master 0
 
 #include <mpi.h>  //This is an mpi program...
@@ -369,7 +368,7 @@ int main (int argc, char** argv){
 		int neighbors = 0;
 
 		for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
-			#pragma omp parallel for
+ 			#pragma omp parallel for
 			for(int i = 1; i < local_grid_height-1; ++i){
 				//The Brunt of the Math (calculating TIV_next from TIV)
 		        	for(int j = 1; j < local_grid_width-1; ++j){
@@ -428,10 +427,10 @@ int main (int argc, char** argv){
 			MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
 		}
 
-
+		
 		//TODO: recombine matrix
 		MPI::COMM_WORLD.Isend(local_TIV, local_grid_size, mpi_tiv, master, 23);
-
+		printf("hi i'm proc %d", rank);
 		if(rank == master){
 			//Recombining the Matrix
 			MPI_Request finished[nprocs_used];
@@ -454,7 +453,7 @@ int main (int argc, char** argv){
 				TIV[i] = new tiv[grid_width];
 			}
 			
-		
+			
 
 			//Unpacking from buffer into the ("logically" arranged) TIV matrix
 			int proc_x, proc_y;
