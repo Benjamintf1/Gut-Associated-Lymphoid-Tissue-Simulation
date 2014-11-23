@@ -425,9 +425,10 @@ int main (int argc, char** argv){
 
 
 			MPI_Waitall(neighbors, receives, MPI_STATUSES_IGNORE);
+			//printf("done with step %d, %d proc", n, rank);
 		}
 
-		
+		//printf("hi, i'm done simulating and i am proc %d\n", rank);
 		MPI::COMM_WORLD.Isend(local_TIV, local_grid_size, mpi_tiv, master, 23);
 		if(rank == master){
 			//Recombining the Matrix

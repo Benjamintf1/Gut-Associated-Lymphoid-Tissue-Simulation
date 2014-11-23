@@ -1,18 +1,17 @@
 #!/bin/bash
 
 #SBATCH --job-name="GALT-simulation"
-#SBATCH --nodes=9
-#SBATCH --ntasks-per-node=16
-#SBATCH --ntasks=144
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --time=00:59:00
 #SBATCH --exclusive
-#SBATCH -o stdout
-#SBATCH -e stderr
+#SBATCH -o stdout.1
+#SBATCH -e stderr.1
 #SBATCH --export=ALL
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=bfuller@mines.edu
 
 cd ~/bins/Gut-Associated-Lymphoid-Tissue-Simulation/
 
-export OMP_NUM_THREADS=16
-srun --kill-on-bad-exit=1 -n 9 ./sim_hybrid Scaling.conf 3 3
+export OMP_NUM_THREADS=1
+srun --kill-on-bad-exit=1 -n 1 ./sim_hybrid Scaling.conf 1 1
