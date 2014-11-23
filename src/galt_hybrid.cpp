@@ -428,9 +428,7 @@ int main (int argc, char** argv){
 		}
 
 		
-		//TODO: recombine matrix
 		MPI::COMM_WORLD.Isend(local_TIV, local_grid_size, mpi_tiv, master, 23);
-		printf("hi i'm proc %d", rank);
 		if(rank == master){
 			//Recombining the Matrix
 			MPI_Request finished[nprocs_used];
