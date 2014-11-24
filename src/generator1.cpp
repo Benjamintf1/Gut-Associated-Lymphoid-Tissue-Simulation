@@ -11,7 +11,7 @@ double generate_I(int x, int y, int width, int height, double delta_space ){
 double generate_V(int x, int y, int width, int height, double delta_space ){
 
 	if(x == width/2 && y != 0 && y != height-1){
-		return height;
+		return y;
 	}
 	return 0.0;
 }
