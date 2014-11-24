@@ -18,7 +18,7 @@ double generate_V(int x, int y, int width, int height, double delta_space ){
 
 double generate_birth(int x, int y, int width, int height, double delta_space ){
 
-	return 20;
+	return 0.00023;
 }
 
 
