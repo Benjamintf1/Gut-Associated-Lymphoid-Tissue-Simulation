@@ -21,4 +21,12 @@ double generate_birth(int x, int y, int width, int height, double delta_space ){
 	return 0.00023;
 }
 
+int generate_tissues(int x, int y, int width, int height, double delta_space ){
+	if(x < width/2) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 
