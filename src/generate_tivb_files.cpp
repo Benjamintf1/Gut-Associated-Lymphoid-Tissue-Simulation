@@ -61,6 +61,7 @@ int main(int argc, char** argv){
 	generated_i_file.close();
 	generated_v_file.close();
 	generated_birth_file.close();
+	generated_tissue_types_file.close();
 
 
 	return 0;
