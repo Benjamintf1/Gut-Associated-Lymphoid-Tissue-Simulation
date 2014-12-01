@@ -70,19 +70,20 @@ int main (int argc, char** argv){
 		double delta_space; //The spatial step length (evenly sized in x and y)
 		int grid_width; //The number of x steps
 		int grid_height; //The number of y steps
-		double diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
-		double diffusion_infected; //D_I: The rate at which infected cells diffuse spatially
-		double diffusion_virus; //D_V: The rate at which viroids diffuse spatially (generally, > D_I or D_T)
-		double death_tcells; //d_T: The death rate of T-cells (from natural deaths)
-		double death_infected; //d_I: The death rate of infected cells
-		double death_virus; //d_V: The death rate of viroids
-		double burst_rate; //N: The amount of viroids created when an infected cell bursts
-		double transmission_vt; //k1: The rate of infection when T-cells and Viroids are near
-		double transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
+		double* diffusion_tcells; //D_T: The rate at which T-cells diffuse spatially
+		double* diffusion_infected; //D_I: The rate at which infected cells diffuse spatially
+		double* diffusion_virus; //D_V: The rate at which viroids diffuse spatially (generally, > D_I or D_T)
+		double* death_tcells; //d_T: The death rate of T-cells (from natural deaths)
+		double* death_infected; //d_I: The death rate of infected cells
+		double* death_virus; //d_V: The death rate of viroids
+		double* burst_rate; //N: The amount of viroids created when an infected cell bursts
+		double* transmission_vt; //k1: The rate of infection when T-cells and Viroids are near
+		double* transmission_it; //k2: The rate of (cell-to-cell) infection when T-cells and Infected T-cells are near
 		double delta_t; //The time step length
 		int number_of_timesteps; //The number of time steps
 		int local_grid_width;
 		int local_grid_height;
+		int number_of_tissue_types;
 	
 		tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
 
@@ -93,6 +94,7 @@ int main (int argc, char** argv){
 		string t_filename;
 		string i_filename;
 		string v_filename;
+		string* tissue_filenames;
 	
 		string result_t_filename;
 		string result_i_filename;
@@ -127,23 +129,50 @@ int main (int argc, char** argv){
 			config_file >> t_filename;
 			config_file >> i_filename;
 			config_file >> v_filename;
-			config_file >> diffusion_tcells;
-			config_file >> diffusion_infected;
-			config_file >> diffusion_virus;
-			config_file >> death_tcells;
-			config_file >> death_infected;
-			config_file >> death_virus;
-			config_file >> burst_rate;
-			config_file >> transmission_vt;
-			config_file >> transmission_it;
+			config_file >> tissue_type_filename;
 			config_file >> delta_t;
 			config_file >> number_of_timesteps;
 			config_file >> result_t_filename;
 			config_file >> result_i_filename;
 			config_file >> result_v_filename;
+			config_file >> number_of_tissue_types;
+			
+			//Adding in sub-config file names
+			tissue_filenames = new double[number_of_tissue_types];
+			for(int i = 0; i < number_of_tissue_types; ++i){
+				config_file >> tissue_filenames[i];
+			}
 	
 			config_file.close();
 
+
+			//Allocating Arrays for each type:
+			double* diffusion_tcells = new double[number_of_tissue_types];
+			double* diffusion_infected = new double[number_of_tissue_types];
+			double* diffusion_virus = new double[number_of_tissue_types];
+			double* death_tcells = new double[number_of_tissue_types];
+			double* death_infected = new double[number_of_tissue_types];
+			double* death_virus = new double[number_of_tissue_types];
+			double* burst_rate = new double[number_of_tissue_types];
+			double* transmission_vt = new double[number_of_tissue_types];
+			double* transmission_it = new double[number_of_tissue_types]; 
+			
+			//Adding in the values from each tissue type configuration file
+			for(int i = 0; i < number_of_tissue_types; ++i) {
+				ifstream subconfig_file(tissue_filenames[i].c_str());
+				
+				subconfig_file >> diffusion_tcells[i];
+				subconfig_file >> diffusion_infected[i];
+				subconfig_file >> diffusion_virus[i];
+				subconfig_file >> death_tcells[i];
+				subconfig_file >> death_infected[i];
+				subconfig_file >> death_virus[i];
+				subconfig_file >> burst_rate[i];
+				subconfig_file >> transmission_vt[i];
+				subconfig_file >> transmission_it[i];
+				
+				subconfig_file.close();
+			}
 
 
 			if( ( grid_width -2 ) % nprocs_x != 0){
@@ -158,21 +187,25 @@ int main (int argc, char** argv){
 			}
 
 
-			//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
-			a4 = delta_t * diffusion_tcells / pow(delta_space, 2);
-			a3 = delta_t * transmission_it;
-			a2 = delta_t * transmission_vt;
-			a1 = 1 - 4 * a4 - delta_t * death_tcells;
-
-			b4 = delta_t * diffusion_infected / pow(delta_space, 2);
-			b3 = a2;
-			b2 = a3;
-			b1 = 1 - 4 * b4 - delta_t * death_infected;
+			for(int i = 0; i < number_of_tissue_types; ++i) {
+				//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
+				a4[i] = delta_t * diffusion_tcells[i] / pow(delta_space, 2);
+				a3[i] = delta_t * transmission_it[i];
+				a2[i] = delta_t * transmission_vt[i];
+				a1[i] = 1 - 4 * a4[i] - delta_t * death_tcells[i];
 	
-			c3 = delta_t * diffusion_virus / pow(delta_space, 2);
-			c2 = delta_t * burst_rate * death_infected; 
-			c1 = 1 - 4 * c3 - delta_t * death_virus; 
+				b4[i] = delta_t * diffusion_infected[i] / pow(delta_space, 2);
+				b3[i] = a2[i];
+				b2[i] = a3[i];
+				b1[i] = 1 - 4 * b4[i] - delta_t * death_infected[i];
 		
+				c3[i] = delta_t * diffusion_virus[i] / pow(delta_space, 2);
+				c2[i] = delta_t * burst_rate[i] * death_infected[i]; 
+				c1[i] = 1 - 4 * c3[i] - delta_t * death_virus[i]; 
+			}
+			
+			//TODO: Change up the Broadcast array (include the number_of_tissue_types and make each broadcast
+			//as needed)
 
 			broadcast_array[0] = a1;
 			broadcast_array[1] = a2;
