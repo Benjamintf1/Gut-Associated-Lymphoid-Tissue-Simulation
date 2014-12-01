@@ -25,6 +25,7 @@ int main(int argc, char** argv){
 	string t_filename;
 	string i_filename;
 	string v_filename;
+	string tissue_types_filename;
 
 	config_file >> delta_space;
 	config_file >> grid_width;
@@ -33,6 +34,7 @@ int main(int argc, char** argv){
 	config_file >> t_filename;
 	config_file >> i_filename;
 	config_file >> v_filename;
+	config_file >> tissue_types_filename;
 	
 	config_file.close();
 
@@ -41,6 +43,7 @@ int main(int argc, char** argv){
 	ofstream generated_i_file(i_filename.c_str(), ios::out |ios::binary);
 	ofstream generated_v_file(v_filename.c_str(), ios::out |ios::binary);
 	ofstream generated_birth_file(birth_rate_filename.c_str(), ios::out |ios::binary);
+	ofstream generated_tissue_types_file(tissue_types_filename.c_str(), ios::out |ios::binary);
 
 
 	for(int i = 0; i < grid_height; ++i){
@@ -49,6 +52,7 @@ int main(int argc, char** argv){
 			binary_write(generated_i_file , generate_I(j, i, grid_width, grid_height, delta_space));
 			binary_write(generated_v_file , generate_V(j, i, grid_width, grid_height, delta_space));
 			binary_write(generated_birth_file, generate_birth(j, i, grid_width, grid_height, delta_space));
+			binary_write(generated_tissue_types_file, generate_tissues(j, i, grid_width, grid_height, delta_space));
 		}
 	}
 
