@@ -30,7 +30,12 @@
 #data files
 *.dat
 
+#stupid files created by stupid editors that dont clean up after themselves, curses upon them and their creators
+*.swp
+
 #compiled code
-sim_s
+sim_serial
+sim_hybrid
+sim_mpi
 gen_files_simple
 
