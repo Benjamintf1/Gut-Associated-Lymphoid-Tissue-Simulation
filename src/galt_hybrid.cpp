@@ -243,8 +243,8 @@ int main (int argc, char** argv){
 				MPI::COMM_WORLD.Bcast( broadcast_array, 11, MPI::DOUBLE, master );
 				
 			}
-			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::DOUBLE, master );
-			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::INT, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::INT, master );
 			MPI::COMM_WORLD.Bcast( &number_of_timesteps, 1, MPI::INT, master );
 
 			
@@ -278,8 +278,8 @@ int main (int argc, char** argv){
 				c2[i] = broadcast_array[9];
 				c3[i] = broadcast_array[10];
 			}
-			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::DOUBLE, master );
-			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::INT, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::INT, master );
 			MPI::COMM_WORLD.Bcast( &number_of_timesteps, 1, MPI::INT, master );
 			
 		}
