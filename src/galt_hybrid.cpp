@@ -88,7 +88,7 @@ int main (int argc, char** argv){
 		tiv** TIV; //A matrix containing the population/volume unit of T-cells, Infected T-cells, and Viroids at each point
 
 		double** tcell_birth_rate; //Lambda: A given matrix of where T-cells are produced/generated into the system.
-	
+		int** tissue_type_map;  //which config file the grid uses.
 		//Variables for reading/writing materices from files:
 		string birth_rate_filename;
 		string t_filename;
@@ -99,18 +99,20 @@ int main (int argc, char** argv){
 		string result_t_filename;
 		string result_i_filename;
 		string result_v_filename;
+		string tissue_type_filename;
 	
 		ifstream birth_rate_file;
+		ifstream tissue_type_file;
 
 
 		//derived variables
-		double a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3;
+		double *a1, *a2, *a3, *a4, *b1, *b2, *b3, *b4, *c1, *c2, *c3;
 	
 		//Buffers
 		double** birth_rate_buffers;
 		tiv** TIV_buffers;
-	
-		double broadcast_array[14];
+		int** tissue_type_buffers;
+		double broadcast_array[11];
 
 		double after_read;
 		double before_write;
@@ -138,7 +140,7 @@ int main (int argc, char** argv){
 			config_file >> number_of_tissue_types;
 			
 			//Adding in sub-config file names
-			tissue_filenames = new double[number_of_tissue_types];
+			tissue_filenames = new string[number_of_tissue_types];
 			for(int i = 0; i < number_of_tissue_types; ++i){
 				config_file >> tissue_filenames[i];
 			}
@@ -157,6 +159,8 @@ int main (int argc, char** argv){
 			double* transmission_vt = new double[number_of_tissue_types];
 			double* transmission_it = new double[number_of_tissue_types]; 
 			
+
+
 			//Adding in the values from each tissue type configuration file
 			for(int i = 0; i < number_of_tissue_types; ++i) {
 				ifstream subconfig_file(tissue_filenames[i].c_str());
@@ -185,8 +189,18 @@ int main (int argc, char** argv){
 				fprintf(stderr, "The height %d(without boundries) is not evenly divisible by %d \n", grid_height-2, nprocs_y);
 				MPI_Abort(MPI_COMM_WORLD, 3);
 			}
-
-
+			a1 = new double[number_of_tissue_types];
+			a2 = new double[number_of_tissue_types]; 
+			a3= new double[number_of_tissue_types]; 
+			a4= new double[number_of_tissue_types]; 
+			b1= new double[number_of_tissue_types]; 
+			b2= new double[number_of_tissue_types]; 
+			b3= new double[number_of_tissue_types]; 
+			b4= new double[number_of_tissue_types]; 
+			c1= new double[number_of_tissue_types]; 
+			c2= new double[number_of_tissue_types]; 
+			c3= new double[number_of_tissue_types];
+				
 			for(int i = 0; i < number_of_tissue_types; ++i) {
 				//VARIABLES: constants in the equations (to avoid repeated multiplications/additions of our input variables together)
 				a4[i] = delta_t * diffusion_tcells[i] / pow(delta_space, 2);
@@ -206,59 +220,75 @@ int main (int argc, char** argv){
 			
 			//TODO: Change up the Broadcast array (include the number_of_tissue_types and make each broadcast
 			//as needed)
-
-			broadcast_array[0] = a1;
-			broadcast_array[1] = a2;
-			broadcast_array[2] = a3;
-			broadcast_array[3] = a4;
-			broadcast_array[4] = b1;
-			broadcast_array[5] = b2;
-			broadcast_array[6] = b3;
-			broadcast_array[7] = b4;			
-			broadcast_array[8] = c1;
-			broadcast_array[9] = c2;	
-			broadcast_array[10] = c3;
-
-		
-
+			MPI::COMM_WORLD.Bcast( &number_of_tissue_types, 1, MPI::INT, master );
 			local_grid_width = ((grid_width - 2)/nprocs_x)+2;
 			local_grid_height = ((grid_height - 2)/nprocs_y)+2;
 
+			
+			
+			for(int i = 0; i < number_of_tissue_types; ++i){
 
-			broadcast_array[11] = local_grid_width;
-			broadcast_array[12] = local_grid_height;
-			broadcast_array[13] = number_of_timesteps;
+				broadcast_array[0] = a1[i];
+				broadcast_array[1] = a2[i];
+				broadcast_array[2] = a3[i];
+				broadcast_array[3] = a4[i];
+				broadcast_array[4] = b1[i];
+				broadcast_array[5] = b2[i];
+				broadcast_array[6] = b3[i];
+				broadcast_array[7] = b4[i];			
+				broadcast_array[8] = c1[i];
+				broadcast_array[9] = c2[i];	
+				broadcast_array[10] = c3[i];
+				
+				MPI::COMM_WORLD.Bcast( broadcast_array, 11, MPI::DOUBLE, master );
+				
+			}
+			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &number_of_timesteps, 1, MPI::INT, master );
 
 			
+
+			
+		} else{
+			MPI::COMM_WORLD.Bcast( &number_of_tissue_types, 1, MPI::INT, master );
+			a1 = new double[number_of_tissue_types];
+			a2 = new double[number_of_tissue_types]; 
+			a3= new double[number_of_tissue_types]; 
+			a4= new double[number_of_tissue_types]; 
+			b1= new double[number_of_tissue_types]; 
+			b2= new double[number_of_tissue_types]; 
+			b3= new double[number_of_tissue_types]; 
+			b4= new double[number_of_tissue_types]; 
+			c1= new double[number_of_tissue_types]; 
+			c2= new double[number_of_tissue_types]; 
+			c3= new double[number_of_tissue_types];
+			for(int i = 0; i < number_of_tissue_types; ++i){
+				MPI::COMM_WORLD.Bcast( broadcast_array, 11, MPI::DOUBLE, master );
+
+				a1[i] = broadcast_array[0];
+				a2[i] = broadcast_array[1];
+				a3[i] = broadcast_array[2];
+				a4[i] = broadcast_array[3];
+				b1[i] = broadcast_array[4];
+				b2[i] = broadcast_array[5];
+				b3[i] = broadcast_array[6];
+				b4[i] = broadcast_array[7];
+				c1[i] = broadcast_array[8];
+				c2[i] = broadcast_array[9];
+				c3[i] = broadcast_array[10];
+			}
+			MPI::COMM_WORLD.Bcast( &local_grid_width, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &local_grid_height, 1, MPI::DOUBLE, master );
+			MPI::COMM_WORLD.Bcast( &number_of_timesteps, 1, MPI::INT, master );
+			
 		}
-	
-
-		MPI::COMM_WORLD.Bcast( broadcast_array, 14, MPI::DOUBLE, master );
-
-		a1 = broadcast_array[0];
-		a2 = broadcast_array[1];
-		a3 = broadcast_array[2];
-		a4 = broadcast_array[3];
-		b1 = broadcast_array[4];
-		b2 = broadcast_array[5];
-		b3 = broadcast_array[6];
-		b4 = broadcast_array[7];
-		c1 = broadcast_array[8];
-		c2 = broadcast_array[9];
-		c3 = broadcast_array[10];
-
-		local_grid_width = broadcast_array[11];
-		local_grid_height = broadcast_array[12];
-		number_of_timesteps = broadcast_array[13];
 		int local_grid_size = local_grid_height * local_grid_width;
-	
-	
-
-
 		if(rank == master){
 			
 			//Initializing TIV
 			TIV = new tiv*[grid_height];
+			
 			for(int i = 0; i < grid_height; ++i ){
 				TIV[i] = new tiv[grid_width];
 			}
@@ -278,18 +308,23 @@ int main (int argc, char** argv){
 			v_file.close();
 		
 			//Initializing birth rate matrix
-	
+			
+			tissue_type_map = new int*[grid_width];
 			tcell_birth_rate = new double*[grid_width];
 			for(int i = 0; i < grid_height; ++i ){
 				tcell_birth_rate[i] = new double[grid_width];
+				tissue_type_map[i] = new int[grid_width];
 			} 
 	
 			//READING the birth rate file (lambda) into a matrix
 			birth_rate_file.open(birth_rate_filename.c_str(), std::ios::in | std::ios::binary);
+			tissue_type_file.open(tissue_type_filename.c_str(),std::ios::in | std::ios::binary);
 			for(int i = 0; i < grid_height; ++i){
 				for(int j = 0; j < grid_width; ++j){
-					birth_rate_file.read(reinterpret_cast<char *>(&tcell_birth_rate[i][j]), sizeof(tcell_birth_rate[i][j]));
+					binary_read(birth_rate_file, tcell_birth_rate[i][j]);
 					tcell_birth_rate[i][j] *= delta_t;
+
+					binary_read(tissue_type_file, tissue_type_map[i][j]);
 				}
 			}
 			birth_rate_file.close();
@@ -305,8 +340,10 @@ int main (int argc, char** argv){
 				TIV_buffers[i] = new tiv[local_grid_size];
 			}
 			birth_rate_buffers = new double* [nprocs_used];
+			tissue_type_buffers = new int*[nprocs_used];
 			for(int i = 0; i < nprocs_used; ++i ){
 				birth_rate_buffers[i] = new double[local_grid_size];
+				tissue_type_buffers[i] = new int[local_grid_size];
 			}
 
 			//Splitting the Matrices
@@ -321,33 +358,37 @@ int main (int argc, char** argv){
 					for(int j = proc_x * (local_grid_width-2) ;     j <= ((proc_x + 1) * (local_grid_width-2)) +1;       ++j) {
 						TIV_buffers[k][n] = TIV[i][j];
 						birth_rate_buffers[k][n] = tcell_birth_rate[i][j];
+						tissue_type_buffers[k][n] = tissue_type_map[i][j];
 						++n;
 					}
 				}
 				MPI::COMM_WORLD.Isend(TIV_buffers[k], local_grid_size, mpi_tiv, k, 1); //TAG: 1
 				MPI::COMM_WORLD.Isend(birth_rate_buffers[k], local_grid_size, MPI::DOUBLE, k, 2); //TAG: 2
+				MPI::COMM_WORLD.Isend(tissue_type_buffers[k], local_grid_size, MPI::INT, k, 88); //88, the best tag number
 			}
 		
 			//Deallocating the no longer needed TIV and t_cell_birth_rate matrices:
 			for(int i = 0; i < grid_height; ++i ){
 				delete[] TIV[i];
 				delete[] tcell_birth_rate[i];
+				delete[] tissue_type_map[i];
 			}
 			delete[] TIV;
 			delete[] tcell_birth_rate;
+			delete[] tissue_type_map;
 		
 		
 		}
 	
 		tiv* local_TIV = new tiv[local_grid_size];
 		double* local_birth = new double[local_grid_size];
-
-		MPI_Request master_recieve[2];
+		int* local_tissue_map = new int[local_grid_size];
+		MPI_Request master_recieve[3];
 		master_recieve[0] = MPI::COMM_WORLD.Irecv(local_TIV, local_grid_size, mpi_tiv, master, 1);
 		master_recieve[1] = MPI::COMM_WORLD.Irecv(local_birth, local_grid_size, MPI::DOUBLE, master, 2);
+		master_recieve[2] = MPI::COMM_WORLD.Irecv(local_tissue_map, local_grid_size, MPI::INT, master, 88);
 		
-		
-		MPI_Waitall(2, master_recieve, MPI_STATUSES_IGNORE);
+		MPI_Waitall(3, master_recieve, MPI_STATUSES_IGNORE);
 		//Initializing TIV_next
 		tiv* local_TIV_next = new tiv[local_grid_size];
 	
@@ -399,24 +440,25 @@ int main (int argc, char** argv){
 		MPI_Request sends[4];
 		MPI_Request receives[4];
 		int neighbors = 0;
-
+		
 		for(int n = 0; n < number_of_timesteps; ++n){ //for each time step from 0 to n-1
  			#pragma omp parallel for
 			for(int i = 1; i < local_grid_height-1; ++i){
 				//The Brunt of the Math (calculating TIV_next from TIV)
 		        	for(int j = 1; j < local_grid_width-1; ++j){
-		        		local_TIV_next[j + i*local_grid_width].t = max(local_TIV[j+i*local_grid_width].t * (a1 - a2 * local_TIV[j+i*local_grid_width].v 
-										- a3 * local_TIV[j+i*local_grid_width].i) + local_birth[j+i*local_grid_width]
-										+ a4 * (local_TIV[j+(i+1)*local_grid_width].t + local_TIV[j+(i-1)*local_grid_width].t
+					int tissue_type = local_tissue_map[j + i*local_grid_width];
+		        		local_TIV_next[j + i*local_grid_width].t = max(local_TIV[j+i*local_grid_width].t * (a1[tissue_type] - a2[tissue_type] * local_TIV[j+i*local_grid_width].v 
+										- a3[tissue_type] * local_TIV[j+i*local_grid_width].i) + local_birth[j+i*local_grid_width]
+										+ a4[tissue_type] * (local_TIV[j+(i+1)*local_grid_width].t + local_TIV[j+(i-1)*local_grid_width].t
 										+ local_TIV[(j+1)+ i*local_grid_width].t + local_TIV[(j-1)+i*local_grid_width].t), 0.0);
 
-		  			local_TIV_next[j + i*local_grid_width].i = max(local_TIV[j+i*local_grid_width].i * (b1 +b2 * local_TIV[j+i*local_grid_width].t) 
-										+ b3 * local_TIV[j+i*local_grid_width].t *local_TIV[j+i*local_grid_width].v
-		        							+ b4 * (local_TIV[j+(i+1)*local_grid_width].i + local_TIV[j+(i-1)*local_grid_width].i 
+		  			local_TIV_next[j + i*local_grid_width].i = max(local_TIV[j+i*local_grid_width].i * (b1[tissue_type] +b2[tissue_type] * local_TIV[j+i*local_grid_width].t) 
+										+ b3[tissue_type] * local_TIV[j+i*local_grid_width].t *local_TIV[j+i*local_grid_width].v
+		        							+ b4[tissue_type] * (local_TIV[j+(i+1)*local_grid_width].i + local_TIV[j+(i-1)*local_grid_width].i 
 										+ local_TIV[(j+1)+i*local_grid_width].i + local_TIV[(j-1)+i*local_grid_width].i), 0.0);
 
-		        		local_TIV_next[j + i*local_grid_width].v = max(local_TIV[j + i*local_grid_width].v * c1 + c2 * local_TIV[j + i*local_grid_width].i
-		        							+c3 * (local_TIV[j+(i+1)*local_grid_width].v + local_TIV[j+(i-1)*local_grid_width].v  
+		        		local_TIV_next[j + i*local_grid_width].v = max(local_TIV[j + i*local_grid_width].v * c1[tissue_type] + c2[tissue_type] * local_TIV[j + i*local_grid_width].i
+		        							+c3[tissue_type] * (local_TIV[j+(i+1)*local_grid_width].v + local_TIV[j+(i-1)*local_grid_width].v  
 										+local_TIV[(j+1)+i*local_grid_width].v + local_TIV[(j-1)+i*local_grid_width].v), 0.0);
 		        	}
 			}
