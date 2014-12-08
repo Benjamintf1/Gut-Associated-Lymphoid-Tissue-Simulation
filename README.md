@@ -15,8 +15,8 @@ You can either use slurm, or mpiexec to run this program.
 
 To run it using slurm, you can use the sbatch on the predefined slurm file mio_sim. 
 
-To run it on sayers or another mpi compatible machine, mpiexec -n (number of cores to run on) ./mpi_hybrid HIV.conf (number of y nodes) (number of x nodes) for example
-mpiexec -n 4 ./mpi_hybrid HIV.conf 2 2
+To run it on sayers or another mpi compatible machine, mpiexec -n (number of cores to run on) ./sim_hybrid HIV.conf (number of y nodes) (number of x nodes) for example
+mpiexec -n 4 ./sim_hybrid HIV.conf 2 2
 
 If you want to use openmp, export the OMP_NUM_THREADS to equal the number of threads to use. 
 
