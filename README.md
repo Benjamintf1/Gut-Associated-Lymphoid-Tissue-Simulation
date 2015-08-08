@@ -17,7 +17,7 @@ mpiexec -n 4 ./sim_hybrid HIV.conf 2 2
 
 If you want to use openmp, export the OMP_NUM_THREADS to equal the number of threads to use. 
 
-The mandatory arguments of the program are (in order), a configuration file, the number of nodes to divide the grid in the x direction, and the number of nodes to divide the grid in the y direction. *Keep in mind the grid given(minus the boundry conditions) must be divisable evenly by the x and y devisors, or the program will output an error to stderr and stop running.*
+The mandatory arguments of the program are (in order), a configuration file, the number of nodes to divide the grid in the x direction, and the number of nodes to divide the grid in the y direction. *Keep in mind the grid given(minus the boundry conditions) must be divisable evenly by the x and y divisors, or the program will output an error to stderr and stop running.*
 
 Configuration Details:
 
