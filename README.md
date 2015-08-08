@@ -1,10 +1,7 @@
 Gut-Associated-Lymphoid-Tissue-Simulation
 =========================================
 
-//TODO: spelllcheck
-
-
-This is a simulation of Hiv or other viruses in gut associated lymphoid tissue with a focus on paralizing for large data sets.
+This is a simulation of HIV or other viruses in gut associated lymphoid tissue with a focus on parallelizing for large data sets.
 
 To Compile: Simply run the make file. This should compile the main program as well as a simple generator. If you want to create your own generator, you have to add that to the
 makefile if you want to be able to automate the compilation of it, which will be described in the generator section. 
@@ -20,11 +17,11 @@ mpiexec -n 4 ./sim_hybrid HIV.conf 2 2
 
 If you want to use openmp, export the OMP_NUM_THREADS to equal the number of threads to use. 
 
-The manditory arguments of the program are(in order), a configuration file, the number of nodes to devide the grid in the x direction, and the number of nodes to devide the grid in the y direction. *Keep in mind the grid given(minus the boundry conditions) must be divisable evenly by the x and y devisors, or the program will output an error to stderr and stop running.*
+The mandatory arguments of the program are (in order), a configuration file, the number of nodes to divide the grid in the x direction, and the number of nodes to divide the grid in the y direction. *Keep in mind the grid given(minus the boundry conditions) must be divisable evenly by the x and y devisors, or the program will output an error to stderr and stop running.*
 
 Configuration Details:
 
-The grid width and height include the boundry spaces.
+The grid width and height include the boundary spaces.
 
 A configuration file should be a file with one double, integer, or string value per line in the following order:
 * (double) delta_space
